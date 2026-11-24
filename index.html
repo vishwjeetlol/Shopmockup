@@ -1,0 +1,3460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kartik Research — Archival Store &amp; Textile Library</title>
+  <style>
+    :root {
+      --bg: #FFFFFF;
+      --paper: #F6F5F1;
+      --stage: #F1EFEA;
+      --ink: #141413;
+      --muted: #6E6C66;
+      --line: #E4E2DB;
+      --line-dark: #141413;
+      --indigo: #1E3246;
+      --madder: #7A2E22;
+      --sans: "Helvetica Neue", Helvetica, Arial, -apple-system, BlinkMacSystemFont, sans-serif;
+      --mono: "SFMono-Regular", ui-monospace, Menlo, Monaco, Consolas, monospace;
+      --header-h: 52px;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      border-radius: 0;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--sans);
+      font-size: 13px;
+      line-height: 1.45;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    button, input, select {
+      font: inherit;
+      color: inherit;
+      background: none;
+      border: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    button { cursor: pointer; }
+    a { color: inherit; text-decoration: none; }
+
+    /* Plain Mode — zero motion, zero WebGL chrome */
+    body.plain-mode * {
+      transition: none !important;
+      animation: none !important;
+    }
+
+    /* ---------------- HEADER (NO COUNTRY BLOCKER WALL) ---------------- */
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      height: var(--header-h);
+      background: var(--bg);
+      border-bottom: 1px solid var(--line);
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      padding: 0 20px;
+      gap: 12px;
+    }
+
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .nav-left::-webkit-scrollbar { display: none; }
+
+    .nav-btn {
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      white-space: nowrap;
+      padding: 6px 0;
+      border-bottom: 1px solid transparent;
+    }
+    .nav-btn:hover { color: var(--ink); }
+    .nav-btn.active {
+      color: var(--ink);
+      border-bottom-color: var(--ink);
+    }
+
+    .brand-mark {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 16px;
+    }
+
+    .util-select, .util-btn {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--ink);
+      padding: 4px 6px;
+      border: 1px solid transparent;
+      white-space: nowrap;
+    }
+    .util-select {
+      border-color: var(--line);
+      background: var(--bg);
+      cursor: pointer;
+    }
+    .util-btn:hover { border-color: var(--line); }
+    .util-btn.is-on {
+      background: var(--ink);
+      color: var(--bg);
+      border-color: var(--ink);
+    }
+
+    /* ---------------- SUBBAR / VIEW CONTAINER ---------------- */
+    .view { display: none; }
+    .view.active { display: block; }
+
+    .mono-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .rule-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding: 10px 20px;
+      border-bottom: 1px solid var(--line);
+      background: var(--paper);
+    }
+
+    /* ---------------- VIEW 1: PRODUCT PAGE (PDP) ---------------- */
+    .pdp-switcher {
+      display: flex;
+      gap: 18px;
+      overflow-x: auto;
+    }
+    .pdp-switch-btn {
+      font-size: 11px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 2px 0;
+      border-bottom: 1px solid transparent;
+      white-space: nowrap;
+    }
+    .pdp-switch-btn.active {
+      color: var(--ink);
+      border-bottom-color: var(--ink);
+    }
+
+    .pdp-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.45fr) minmax(340px, 0.95fr);
+      min-height: calc(100vh - var(--header-h) - 41px);
+    }
+
+    .pdp-media {
+      position: relative;
+      background: var(--stage);
+      border-right: 1px solid var(--line);
+      display: flex;
+      flex-direction: column;
+      min-height: 580px;
+    }
+
+    .stage-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--line);
+      background: var(--bg);
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .mode-group {
+      display: flex;
+      border: 1px solid var(--line);
+    }
+    .mode-tab {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      padding: 6px 11px;
+      color: var(--muted);
+      border-right: 1px solid var(--line);
+      background: var(--bg);
+    }
+    .mode-tab:last-child { border-right: none; }
+    .mode-tab:hover { color: var(--ink); }
+    .mode-tab.active {
+      background: var(--ink);
+      color: var(--bg);
+    }
+    .mode-tab:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    .stage-viewport {
+      position: relative;
+      flex: 1;
+      min-height: 520px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--stage);
+      user-select: none;
+    }
+
+    .stage-photo {
+      width: 100%;
+      height: 100%;
+      max-height: 760px;
+      object-fit: contain;
+      display: block;
+    }
+
+    .stage-canvas-host {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: none;
+    }
+    .stage-canvas-host.active { display: block; }
+    .stage-canvas-host canvas {
+      display: block;
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    .stage-caption {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      border-top: 1px solid var(--line);
+      background: var(--bg);
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--muted);
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .stage-subcontrols {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .inline-ctrl {
+      font-family: var(--mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--ink);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    /* PDP Right Column */
+    .pdp-info {
+      padding: 28px 28px 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+      background: var(--bg);
+    }
+
+    .pdp-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 16px;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 16px;
+    }
+    .pdp-title {
+      font-size: 18px;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin: 4px 0 0;
+    }
+    .pdp-price {
+      font-family: var(--mono);
+      font-size: 14px;
+      white-space: nowrap;
+    }
+
+    .pdp-desc {
+      margin: 0;
+      color: #2B2A27;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    /* Size Grid */
+    .size-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .size-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
+      gap: 6px;
+    }
+    .size-btn {
+      height: 36px;
+      border: 1px solid var(--line);
+      font-family: var(--mono);
+      font-size: 11px;
+      position: relative;
+      background: var(--bg);
+    }
+    .size-btn:hover { border-color: var(--ink); }
+    .size-btn.selected {
+      background: var(--ink);
+      color: var(--bg);
+      border-color: var(--ink);
+    }
+    .size-btn.sold-out {
+      color: var(--muted);
+      background: var(--paper);
+      text-decoration: line-through;
+    }
+    .size-btn.sold-out.selected {
+      background: var(--paper);
+      color: var(--madder);
+      border-color: var(--madder);
+    }
+
+    .primary-cta {
+      width: 100%;
+      height: 44px;
+      background: var(--ink);
+      color: var(--bg);
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      border: 1px solid var(--ink);
+    }
+    .primary-cta:hover {
+      background: var(--bg);
+      color: var(--ink);
+    }
+
+    /* Inline Made-to-Order / Waitlist Box (NO POPUPS) */
+    .waitlist-box {
+      border: 1px solid var(--madder);
+      background: var(--paper);
+      padding: 14px;
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .waitlist-box.open { display: flex; }
+    .waitlist-row {
+      display: flex;
+      gap: 8px;
+    }
+    .text-input {
+      flex: 1;
+      height: 36px;
+      padding: 0 10px;
+      border: 1px solid var(--line-dark);
+      background: var(--bg);
+      font-size: 12px;
+    }
+    .secondary-cta {
+      height: 36px;
+      padding: 0 14px;
+      border: 1px solid var(--ink);
+      background: var(--ink);
+      color: var(--bg);
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .secondary-cta:hover {
+      background: var(--bg);
+      color: var(--ink);
+    }
+
+    /* Linked Textile Swatches inside PDP */
+    .spec-section {
+      border-top: 1px solid var(--line);
+      padding-top: 16px;
+    }
+    .linked-swatches {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .linked-swatch-card {
+      display: grid;
+      grid-template-columns: 44px 1fr auto;
+      align-items: center;
+      gap: 12px;
+      padding: 8px;
+      border: 1px solid var(--line);
+      background: var(--paper);
+      text-align: left;
+    }
+    .linked-swatch-card:hover { border-color: var(--ink); }
+    .linked-swatch-thumb {
+      width: 44px;
+      height: 44px;
+      object-fit: cover;
+      border: 1px solid var(--line);
+      display: block;
+    }
+
+    .spec-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+    }
+    .spec-table td {
+      padding: 7px 0;
+      border-bottom: 1px solid var(--line);
+      font-size: 12px;
+      vertical-align: top;
+    }
+    .spec-table td:first-child {
+      font-family: var(--mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      width: 38%;
+    }
+
+    /* ---------------- VIEW 2: TEXTILE LIBRARY (12 LIGHT-REACTIVE SWATCHES) ---------------- */
+    .lib-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      padding: 12px 20px;
+      border-bottom: 1px solid var(--line);
+      background: var(--paper);
+    }
+    .lib-controls input, .lib-controls select {
+      height: 32px;
+      padding: 0 10px;
+      border: 1px solid var(--line);
+      background: var(--bg);
+      font-size: 11px;
+    }
+    .lib-controls input { min-width: 210px; }
+
+    .lib-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(340px, 0.85fr);
+      min-height: calc(100vh - var(--header-h) - 57px);
+    }
+
+    .swatch-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+      border-right: 1px solid var(--line);
+      align-content: start;
+    }
+
+    .swatch-card {
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      padding: 12px;
+      text-align: left;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .swatch-card:hover { background: var(--paper); }
+    .swatch-card.active {
+      background: var(--paper);
+      outline: 1px solid var(--ink);
+      outline-offset: -1px;
+    }
+    .swatch-img {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      object-fit: cover;
+      display: block;
+      border: 1px solid var(--line);
+    }
+
+    .lib-inspector {
+      position: sticky;
+      top: var(--header-h);
+      height: calc(100vh - var(--header-h));
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg);
+    }
+    .lib-stage {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      background: var(--stage);
+      border-bottom: 1px solid var(--line);
+      overflow: hidden;
+    }
+    .lib-stage img, .lib-stage canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .lib-meta {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .pairings-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .chip-btn {
+      font-family: var(--mono);
+      font-size: 10px;
+      padding: 5px 8px;
+      border: 1px solid var(--line);
+      background: var(--paper);
+    }
+    .chip-btn:hover { border-color: var(--ink); }
+
+    /* ---------------- VIEW 3: ONE-OF-A-KIND 61 ORCHARD ST RACK ---------------- */
+    .rack-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.5fr) minmax(320px, 0.75fr);
+      min-height: calc(100vh - var(--header-h) - 41px);
+    }
+    .rack-stage-wrap {
+      position: relative;
+      background: #ECEAE3;
+      border-right: 1px solid var(--line);
+      display: flex;
+      flex-direction: column;
+      min-height: 540px;
+    }
+    .rack-canvas-host {
+      position: relative;
+      flex: 1;
+      min-height: 460px;
+      overflow: hidden;
+    }
+    .rack-plain-strip {
+      display: none;
+      padding: 20px;
+      gap: 12px;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      overflow-y: auto;
+    }
+    .rack-scrubber {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      border-top: 1px solid var(--line);
+      background: var(--bg);
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .rack-index-btns {
+      display: flex;
+      gap: 4px;
+    }
+    .rack-idx {
+      font-family: var(--mono);
+      font-size: 11px;
+      width: 34px;
+      height: 28px;
+      border: 1px solid var(--line);
+    }
+    .rack-idx.active {
+      background: var(--ink);
+      color: var(--bg);
+      border-color: var(--ink);
+    }
+    .rack-sidebar {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      background: var(--bg);
+    }
+
+    /* ---------------- VIEW 4: 11-STATE INDIA CRAFT MAP ---------------- */
+    .map-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(340px, 0.9fr);
+      min-height: calc(100vh - var(--header-h) - 41px);
+    }
+    .map-stage {
+      background: var(--paper);
+      border-right: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      position: relative;
+    }
+    .india-svg {
+      width: 100%;
+      max-width: 480px;
+      height: auto;
+    }
+    .state-pin { cursor: pointer; }
+    .state-pin circle.dot {
+      fill: var(--bg);
+      stroke: var(--ink);
+      stroke-width: 1.5;
+    }
+    .state-pin.active circle.dot {
+      fill: var(--indigo);
+      stroke: var(--indigo);
+    }
+    .state-pin text {
+      font-family: var(--mono);
+      font-size: 9px;
+      fill: var(--ink);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .map-panel {
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      background: var(--bg);
+    }
+
+    /* ---------------- VIEW 5: ARCHIVE ---------------- */
+    .archive-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    }
+    .archive-item {
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    /* ---------------- SLIDE-OVER DRAWERS (BAG & STUDIO ASSET LOADER) ---------------- */
+    .drawer-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(20, 20, 19, 0.25);
+      z-index: 60;
+      display: none;
+    }
+    .drawer-backdrop.open { display: block; }
+
+    .drawer {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: min(440px, 100vw);
+      background: var(--bg);
+      border-left: 1px solid var(--line-dark);
+      z-index: 70;
+      display: none;
+      flex-direction: column;
+    }
+    .drawer.open { display: flex; }
+
+    .drawer-head {
+      height: var(--header-h);
+      padding: 0 20px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .drawer-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .drawer-foot {
+      padding: 16px 20px;
+      border-top: 1px solid var(--line);
+      background: var(--paper);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .bag-item {
+      display: grid;
+      grid-template-columns: 64px 1fr;
+      gap: 12px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--line);
+    }
+    .bag-thumb {
+      width: 64px;
+      height: 76px;
+      object-fit: cover;
+      border: 1px solid var(--line);
+    }
+    .qty-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .qty-btn {
+      width: 24px;
+      height: 24px;
+      border: 1px solid var(--line);
+      font-family: var(--mono);
+    }
+
+    /* ---------------- FOOTER ---------------- */
+    .site-footer {
+      border-top: 1px solid var(--line);
+      padding: 28px 20px;
+      background: var(--paper);
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 24px;
+      font-size: 12px;
+    }
+    .footer-col h4 {
+      margin: 0 0 10px;
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 500;
+    }
+    .footer-col p { margin: 0 0 6px; color: var(--ink); }
+
+    @media (max-width: 960px) {
+      .site-header {
+        grid-template-columns: auto 1fr;
+        height: auto;
+        padding: 10px 14px;
+      }
+      .brand-mark { text-align: left; }
+      .nav-left { grid-column: 1 / -1; order: 3; padding-top: 4px; }
+      .pdp-layout, .lib-layout, .rack-layout, .map-layout {
+        grid-template-columns: 1fr;
+      }
+      .pdp-media, .swatch-grid, .rack-stage-wrap, .map-stage {
+        border-right: none;
+        border-bottom: 1px solid var(--line);
+      }
+      .lib-inspector { position: static; height: auto; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- CLEAN SINGLE-ROW HEADER (REPLACES FULL-SCREEN COUNTRY WALL) -->
+  <header class="site-header">
+    <nav class="nav-left" aria-label="Primary">
+      <button class="nav-btn active" data-view="pdp">Shop</button>
+      <button class="nav-btn" data-view="library">Craft (12 / 137)</button>
+      <button class="nav-btn" data-view="rack">One of a Kind</button>
+      <button class="nav-btn" data-view="map">Craft Map</button>
+      <button class="nav-btn" data-view="archive">Archive</button>
+    </nav>
+
+    <div class="brand-mark">KARTIK RESEARCH</div>
+
+    <div class="nav-right">
+      <select id="currencySelect" class="util-select" aria-label="Currency">
+        <option value="USD">USD $</option>
+        <option value="INR">INR &#8377;</option>
+        <option value="EUR">EUR &euro;</option>
+        <option value="GBP">GBP &pound;</option>
+      </select>
+      <button id="plainModeBtn" class="util-btn" aria-pressed="false" title="Disable WebGL and motion">Plain: Off</button>
+      <button id="assetLoaderBtn" class="util-btn" title="Drop real Kartik Research photos or Blender GLB">Studio Assets</button>
+      <button id="bagOpenBtn" class="util-btn">Bag (<span id="bagCount">0</span>)</button>
+    </div>
+  </header>
+
+  <!-- ==================== VIEW 1: PRODUCT DETAIL PAGE ==================== -->
+  <main id="view-pdp" class="view active">
+    <div class="rule-bar">
+      <div class="pdp-switcher" id="pdpSwitcher"></div>
+      <span class="mono-label">FW26 / DIRECT FULL-PRICE EDITION &mdash; PHOTO FIRST, 3D ON DEMAND</span>
+    </div>
+
+    <section class="pdp-layout">
+      <div class="pdp-media">
+        <div class="stage-toolbar">
+          <div class="mode-group" role="tablist" aria-label="Product inspection mode">
+            <button class="mode-tab active" data-pdp-mode="photo">01 Photo</button>
+            <button class="mode-tab" data-pdp-mode="light">02 Cloth in Light (WebGL)</button>
+            <button class="mode-tab" data-pdp-mode="3d">03 Load 3D Model</button>
+          </div>
+          <div class="stage-subcontrols" id="pdpSubControls"></div>
+        </div>
+
+        <div class="stage-viewport" id="pdpViewport">
+          <img id="pdpPhotoImg" class="stage-photo" alt="Garment studio view" />
+          <div id="pdpLightHost" class="stage-canvas-host" aria-label="Interactive raking-light cloth viewer"></div>
+          <div id="pdp3dHost" class="stage-canvas-host" aria-label="Interactive 3D garment turntable"></div>
+        </div>
+
+        <div class="stage-caption">
+          <span id="pdpStageHint">Static photograph loaded first. Click "Cloth in Light" or "Load 3D Model" to inspect handwork.</span>
+          <span id="pdpTelemetry">PAYLOAD: 2D PLATE</span>
+        </div>
+      </div>
+
+      <aside class="pdp-info">
+        <div>
+          <span class="mono-label" id="pdpSeasonCode">FW26 &middot; NEW DELHI ATELIER</span>
+          <div class="pdp-title-row">
+            <h1 class="pdp-title" id="pdpTitle"></h1>
+            <div class="pdp-price" id="pdpPrice"></div>
+          </div>
+        </div>
+
+        <p class="pdp-desc" id="pdpDesc"></p>
+
+        <!-- Size Selector -->
+        <div>
+          <div class="size-header">
+            <span class="mono-label">Select Size</span>
+            <span class="mono-label" id="sizeStatusNote">Crossed sizes open artisan waitlist</span>
+          </div>
+          <div class="size-grid" id="pdpSizes"></div>
+        </div>
+
+        <!-- Primary Action OR Sold-Out Made-to-Order Waitlist -->
+        <button id="pdpAddBtn" class="primary-cta">Add to Bag</button>
+
+        <div id="waitlistBox" class="waitlist-box">
+          <div class="mono-label" style="color: var(--madder);" id="waitlistTitle">Size Sold Out &mdash; Request Next Small Batch</div>
+          <div style="font-size: 12px; color: var(--ink);">
+            Leave your email to reserve a made-to-order slot or get notified when our partner cluster finishes the next run.
+          </div>
+          <form id="waitlistForm" class="waitlist-row">
+            <input type="email" id="waitlistEmail" class="text-input" placeholder="you@domain.com" required />
+            <button type="submit" class="secondary-cta">Join Batch</button>
+          </form>
+          <div id="waitlistFeedback" class="mono-label" style="color: var(--indigo);"></div>
+        </div>
+
+        <!-- Linked Swatches from the 137 Textile Library -->
+        <div class="spec-section">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span class="mono-label">Textiles Used (Linked to Craft Archive)</span>
+            <button class="inline-ctrl" id="openFullLibFromPdp">All Swatches &rarr;</button>
+          </div>
+          <div class="linked-swatches" id="pdpLinkedSwatches"></div>
+        </div>
+
+        <!-- Provenance Table -->
+        <div class="spec-section">
+          <span class="mono-label">Construction &amp; Provenance</span>
+          <table class="spec-table" id="pdpSpecTable"></table>
+        </div>
+      </aside>
+    </section>
+  </main>
+
+  <!-- ==================== VIEW 2: 12 LIGHT-REACTIVE TEXTILE LIBRARY ==================== -->
+  <section id="view-library" class="view">
+    <div class="lib-controls">
+      <span class="mono-label">Phase 1 Pilot: 12 Scanned Swatches (of 137)</span>
+      <input type="search" id="libSearch" placeholder="Search swatch no., craft, state..." />
+      <select id="libTechniqueFilter"><option value="">All Techniques</option></select>
+      <select id="libRegionFilter"><option value="">All Regions</option></select>
+      <select id="libColorFilter"><option value="">All Color Families</option></select>
+      <button id="libResetFilters" class="util-btn" style="border-color: var(--line);">Reset</button>
+      <div style="margin-left:auto; display:flex; gap:10px; align-items:center;">
+        <button id="audioToggleBtn" class="util-btn" style="border-color: var(--line);">Workshop Sound: Off</button>
+      </div>
+    </div>
+
+    <div class="lib-layout">
+      <div class="swatch-grid" id="swatchGrid"></div>
+
+      <aside class="lib-inspector">
+        <div class="lib-stage" id="libStage">
+          <img id="libPhotoFallback" alt="Swatch photograph" />
+          <div id="libLightHost" class="stage-canvas-host"></div>
+        </div>
+
+        <div class="stage-caption">
+          <span id="libStageHint">Move cursor or drag across cloth to rake 3200K lamp light across stitches.</span>
+          <div class="stage-subcontrols">
+            <button id="libLightToggle" class="inline-ctrl">Enable Light Scan</button>
+            <button id="libZoomToggle" class="inline-ctrl">Macro 2.4&times;: Off</button>
+          </div>
+        </div>
+
+        <div class="lib-meta">
+          <div>
+            <span class="mono-label" id="libCode"></span>
+            <h2 style="margin:4px 0 6px; font-size:16px; font-weight:500; text-transform:uppercase; letter-spacing:0.04em;" id="libName"></h2>
+            <p style="margin:0; font-size:12.5px; color:#2B2A27;" id="libNotes"></p>
+          </div>
+
+          <table class="spec-table" id="libSpecTable"></table>
+
+          <div>
+            <span class="mono-label">Pairs Well With</span>
+            <div class="pairings-row" id="libPairings" style="margin-top:8px;"></div>
+          </div>
+
+          <div>
+            <span class="mono-label">Used In Garments</span>
+            <div class="pairings-row" id="libLinkedProducts" style="margin-top:8px;"></div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ==================== VIEW 3: ONE-OF-A-KIND 61 ORCHARD ST RACK ==================== -->
+  <section id="view-rack" class="view">
+    <div class="rule-bar">
+      <span class="mono-label">ONE-OF-A-KIND EDITIONS (1/1) &mdash; 61 ORCHARD ST SPATIAL RAIL</span>
+      <span class="mono-label">NO TWO QUILTS REPEAT &mdash; DRAG RAIL OR SELECT INDEX TO INSPECT EACH PIECE</span>
+    </div>
+
+    <div class="rack-layout">
+      <div class="rack-stage-wrap">
+        <div id="rackCanvasHost" class="rack-canvas-host"></div>
+        <div id="rackPlainStrip" class="rack-plain-strip"></div>
+
+        <div class="rack-scrubber">
+          <div class="rack-index-btns" id="rackIndexBtns"></div>
+          <span class="mono-label" id="rackHint">Drag left/right on rail &middot; Click any garment to pull forward</span>
+        </div>
+      </div>
+
+      <aside class="rack-sidebar">
+        <div>
+          <span class="mono-label" id="rackEditionTag">EDITION 01 / 01 &middot; SINGULAR</span>
+          <h2 style="margin:6px 0 4px; font-size:17px; font-weight:500; text-transform:uppercase; letter-spacing:0.04em;" id="rackTitle"></h2>
+          <div class="pdp-price" id="rackPrice"></div>
+        </div>
+
+        <p class="pdp-desc" id="rackDesc"></p>
+
+        <table class="spec-table" id="rackSpecTable"></table>
+
+        <button id="rackClaimBtn" class="primary-cta">Claim This 1/1 Piece</button>
+
+        <div class="spec-section">
+          <span class="mono-label">Why Spatial Rail Instead of Grid?</span>
+          <p style="margin:6px 0 0; font-size:12px; color:var(--muted);">
+            Vintage Kantha and upcycled Chintz pieces cannot be standardized into a single SKU photo. Each hanger below represents one exact physical garment in stock at New Delhi or 61 Orchard St.
+          </p>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ==================== VIEW 4: 11-STATE INDIA CRAFT MAP ==================== -->
+  <section id="view-map" class="view">
+    <div class="rule-bar">
+      <span class="mono-label">INDIA CRAFT ATLAS &mdash; 11 PARTNER REGIONS CONNECTED TO SWATCHES &amp; SEASONS</span>
+      <span class="mono-label">SELECT A STATE PIN TO TRACE TEXTILES</span>
+    </div>
+
+    <div class="map-layout">
+      <div class="map-stage">
+        <svg class="india-svg" viewBox="0 0 420 470" role="img" aria-label="Interactive map of Indian craft regions">
+          <!-- Minimal architectural outline of India -->
+          <path d="M155,24 L182,18 L205,36 L220,56 L205,78 L232,102 L262,126 L296,136 L332,130 L358,144 L378,136 L390,152 L372,172 L348,176 L332,196 L318,192 L310,174 L296,196 L282,216 L252,238 L234,262 L212,296 L196,334 L188,378 L168,424 L152,446 L138,424 L126,382 L114,332 L100,282 L94,238 L70,224 L52,202 L68,186 L56,166 L82,148 L106,120 L132,96 L142,64 Z"
+                fill="#FFFFFF" stroke="#141413" stroke-width="1.25" />
+          <!-- Subtle latitude/longitude archival grid lines -->
+          <line x1="20" y1="150" x2="400" y2="150" stroke="#E4E2DB" stroke-width="0.75" stroke-dasharray="3 3" />
+          <line x1="20" y1="270" x2="400" y2="270" stroke="#E4E2DB" stroke-width="0.75" stroke-dasharray="3 3" />
+          <line x1="175" y1="10" x2="175" y2="455" stroke="#E4E2DB" stroke-width="0.75" stroke-dasharray="3 3" />
+          <g id="mapPinsLayer"></g>
+        </svg>
+      </div>
+
+      <aside class="map-panel" id="mapPanel"></aside>
+    </div>
+  </section>
+
+  <!-- ==================== VIEW 5: CLEANED SEASONAL ARCHIVE ==================== -->
+  <section id="view-archive" class="view">
+    <div class="rule-bar">
+      <span class="mono-label">SEASONAL RESEARCH ARCHIVE (TEMPLATE COPY REMOVED)</span>
+      <span class="mono-label">2021 &ndash; 2027</span>
+    </div>
+    <div class="archive-grid" id="archiveGrid"></div>
+  </section>
+
+  <!-- ==================== FOOTER (CLEANED BRAND EMAILS) ==================== -->
+  <footer class="site-footer">
+    <div class="footer-col">
+      <h4>New York Flagship</h4>
+      <p>61 Orchard Street, New York, NY 10002</p>
+      <p class="mono-label">Wed&ndash;Mon 11:00&ndash;19:00 &middot; Closed Tue</p>
+    </div>
+    <div class="footer-col">
+      <h4>New Delhi Flagship</h4>
+      <p>M-82, 2nd Floor, M Block Market, GK2</p>
+      <p class="mono-label">Wed&ndash;Fri 12:00&ndash;20:00 &middot; Sat&ndash;Sun 13:00&ndash;21:00</p>
+    </div>
+    <div class="footer-col">
+      <h4>Inquiries (Cleaned Domain)</h4>
+      <p>Studio &amp; Hiring: studio@kartikresearch.com</p>
+      <p>US Client Care: neil@kartikresearch.com</p>
+      <p>India Client Care: aryan@kartikresearch.com</p>
+    </div>
+    <div class="footer-col">
+      <h4>Technical Guardrails</h4>
+      <p>Photo-first loading. Non-Draco GLB for Shopify iOS USDZ.</p>
+      <p>Zero AI models. Zero third-party tracking bloat.</p>
+    </div>
+  </footer>
+
+  <!-- ==================== DRAWERS ==================== -->
+  <div id="drawerBackdrop" class="drawer-backdrop"></div>
+
+  <!-- Shopping Bag Drawer -->
+  <aside id="bagDrawer" class="drawer" aria-label="Shopping Bag">
+    <div class="drawer-head">
+      <span class="mono-label" style="color:var(--ink);">Shopping Bag</span>
+      <button class="util-btn" data-close-drawer>Close &times;</button>
+    </div>
+    <div class="drawer-body" id="bagItems"></div>
+    <div class="drawer-foot">
+      <div style="display:flex; justify-content:space-between; align-items:baseline;">
+        <span class="mono-label">Subtotal (Taxes at Checkout)</span>
+        <strong style="font-family:var(--mono); font-size:14px;" id="bagSubtotal"></strong>
+      </div>
+      <button id="checkoutDemoBtn" class="primary-cta">Proceed to Shopify Checkout</button>
+    </div>
+  </aside>
+
+  <!-- Real Photo & Blender GLB Asset Loader Drawer -->
+  <aside id="assetDrawer" class="drawer" aria-label="Studio Asset Loader">
+    <div class="drawer-head">
+      <span class="mono-label" style="color:var(--ink);">Studio Photo &amp; Blender .GLB Loader</span>
+      <button class="util-btn" data-close-drawer>Close &times;</button>
+    </div>
+    <div class="drawer-body">
+      <p style="margin:0; font-size:12px; color:var(--muted);">
+        Load Kartik Research's real JPG/PNG photographs or your Blender 4.x exported <code>.glb</code> model right into the live site. Uploaded photos automatically pass through an in-browser Sobel normal-map solver so the WebGL raking-light stitch inspector works on real photography immediately.
+      </p>
+
+      <div class="spec-section">
+        <span class="mono-label">1. Replace Active Product Photograph</span>
+        <p style="margin:6px 0 8px; font-size:12px;">Target: <strong id="assetTargetProduct"></strong></p>
+        <input type="file" id="uploadProductPhoto" accept="image/*" style="font-size:11px; width:100%;" />
+      </div>
+
+      <div class="spec-section">
+        <span class="mono-label">2. Load Real Textile Swatch Photo (Auto Normal Map)</span>
+        <p style="margin:6px 0 8px; font-size:12px;">Target Swatch: <strong id="assetTargetSwatch"></strong></p>
+        <input type="file" id="uploadSwatchPhoto" accept="image/*" style="font-size:11px; width:100%;" />
+        <label style="display:block; margin-top:8px;" class="mono-label">
+          Relief Strength: <span id="sobelStrengthVal">2.4</span>
+          <input type="range" id="sobelStrength" min="0.6" max="5.0" step="0.2" value="2.4" style="width:100%; margin-top:4px;" />
+        </label>
+      </div>
+
+      <div class="spec-section">
+        <span class="mono-label">3. Load Blender Exported .GLB Model (Atma Tote / Garment)</span>
+        <p style="margin:6px 0 8px; font-size:12px;">Run <code>kartik_research_blender_assets.py</code>, then drop <code>atma_tote.glb</code> or any <code>.glb</code> here:</p>
+        <input type="file" id="uploadGlbFile" accept=".glb,.gltf" style="font-size:11px; width:100%;" />
+      </div>
+
+      <div id="assetLoaderStatus" class="mono-label" style="color: var(--indigo);"></div>
+    </div>
+  </aside>
+
+  <!-- Three.js r128 UMD (Works cleanly on BOTH file:// and https:// Vercel without module CORS breaks) -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+
+  <script>
+  (function () {
+    'use strict';
+
+    /* =========================================================================
+       0. PRODUCTION ASSET OVERRIDES
+       Once you place Kartik Research's real photos & Blender .glb exports in
+       /assets/ on your server or Shopify CDN, paste their relative or HTTPS
+       paths right here. Empty strings automatically use the procedural studio
+       textile & garment generator so there are NEVER broken images.
+    ========================================================================= */
+    const KR_STUDIO_ASSETS = {
+      products: {
+        'crash-kantha-denim': { photo: '', glb: './crash_kantha_trouser.glb' },
+        'atma-tote':          { photo: '', glb: './atma_tote.glb' },
+        'kantha-overcoat':    { photo: '', glb: './kantha_overcoat.glb' },
+        'indigo-check-shirt': { photo: '', glb: './indigo_check_shirt.glb' }
+      },
+      rackGlb: './orchard_rack.glb',
+      swatches: {},
+      audio: {
+        workshopLoopUrl: ''
+      }
+    };
+
+    /* =========================================================================
+       1. CATALOG DATA (GROUNDED IN KARTIKRESEARCH.COM & CRAFT ARCHIVE)
+    ========================================================================= */
+    const CURRENCIES = {
+      USD: { symbol: '$', rate: 1 },
+      INR: { symbol: '₹', rate: 84.5 },
+      EUR: { symbol: '€', rate: 0.92 },
+      GBP: { symbol: '£', rate: 0.79 }
+    };
+
+    const SWATCHES = [
+      { id: '059', code: 'No. 059', name: 'Kantha Embroidery — Patchwork', technique: 'Kantha', region: 'West Bengal', colorFamily: 'Indigo', baseHex: '#283A4E', accentHex: '#D8CFC0', metallic: 0.05, pattern: 'kantha', hours: '42 hrs / panel', notes: 'Running stitch through layered repurposed cotton quilts. Uneven tension creates natural wave relief under grazing light.', pairsWith: ['022', '111', '014'] },
+      { id: '008', code: 'No. 008', name: 'Zardozi Bullion Embroidery', technique: 'Zardozi Embroidery', region: 'Uttar Pradesh', colorFamily: 'Gold', baseHex: '#1F1D1B', accentHex: '#C5A059', metallic: 0.92, pattern: 'zardozi', hours: '68 hrs / motif', notes: 'Coiled metallic wire stitched onto matte handwoven base. High specular contrast reveals stitch angle on cursor tilt.', pairsWith: ['015', '075', '059'] },
+      { id: '060', code: 'No. 060', name: 'Kasuti Geometric Embroidery', technique: 'Kasuti Embroidery', region: 'Karnataka', colorFamily: 'Earth', baseHex: '#6F3426', accentHex: '#ECE4D5', metallic: 0.04, pattern: 'kasuti', hours: '35 hrs / yoke', notes: 'Counted-thread geometric stitchwork from North Karnataka without knots, allowing clean reversal on both faces of cloth.', pairsWith: ['111', '124', '022'] },
+      { id: '014', code: 'No. 014', name: 'Crash Kantha Heavy Cotton', technique: 'Kantha', region: 'West Bengal', colorFamily: 'Indigo', baseHex: '#1D2B3A', accentHex: '#9C4836', metallic: 0.05, pattern: 'crash-kantha', hours: '54 hrs / trouser', notes: 'Dense overlapping running stitch engineered to fracture and pucker handwoven denim along stress seams.', pairsWith: ['059', '022', '030'] },
+      { id: '022', code: 'No. 022', name: 'Handwoven Natural Indigo Denim', technique: 'Handloom Weaving', region: 'Gujarat', colorFamily: 'Indigo', baseHex: '#243547', accentHex: '#B8C1C9', metallic: 0.03, pattern: 'denim', hours: '18 hrs / meter', notes: 'Shuttle-loomed coarse cotton twill dyed in fermented natural indigo vats. Irregular slubs register as micro-ridges.', pairsWith: ['014', '059', '019'] },
+      { id: '030', code: 'No. 030', name: 'Shisha Mirror Embroidery', technique: 'Mirror Embroidery', region: 'Rajasthan', colorFamily: 'Earth', baseHex: '#4F352C', accentHex: '#E5E8EC', metallic: 0.95, pattern: 'mirror', hours: '46 hrs / panel', notes: 'Hand-cut glass discs anchored by buttonhole cotton rings. Specular flashes shift sharply as light angle moves.', pairsWith: ['019', '022', '005'] },
+      { id: '019', code: 'No. 019', name: 'Rabari Hand Stitching', technique: 'Rabari Stitching', region: 'Gujarat', colorFamily: 'Ecru', baseHex: '#DDD5C5', accentHex: '#843426', metallic: 0.12, pattern: 'rabari', hours: '38 hrs / garment', notes: 'Pastoral Kutch stitch vocabulary translating daily visual memory into raised chain-stitch borders.', pairsWith: ['022', '111', '030'] },
+      { id: '015', code: 'No. 015', name: 'Benarasi Silk Brocade', technique: 'Benarasi Weave', region: 'Uttar Pradesh', colorFamily: 'Gold', baseHex: '#3D2722', accentHex: '#CFA863', metallic: 0.78, pattern: 'benarasi', hours: '72 hrs / meter', notes: 'Handloom mulberry silk interlaced with tested gold zari weft. Warm metallic glow emerges only at low raking angles.', pairsWith: ['008', '075', '080'] },
+      { id: '075', code: 'No. 075', name: 'Indigo Gold Zari Weave', technique: 'Handloom Weaving', region: 'Uttar Pradesh', colorFamily: 'Indigo', baseHex: '#1B2A3C', accentHex: '#C7A35B', metallic: 0.72, pattern: 'zari-indigo', hours: '40 hrs / meter', notes: 'Deep vat-dyed indigo warp crossed by fine matte-gold supplementary weft threads.', pairsWith: ['008', '015', '059'] },
+      { id: '005', code: 'No. 005', name: 'Bandhani Tie-Resist Cotton', technique: 'Tie-Dye', region: 'Gujarat', colorFamily: 'Earth', baseHex: '#732D24', accentHex: '#E8DFCF', metallic: 0.02, pattern: 'bandhani', hours: '28 hrs / panel', notes: 'Thousands of fingernail-pinched resist knots tied before natural madder bath, leaving raised puckered dimples.', pairsWith: ['030', '019', '111'] },
+      { id: '080', code: 'No. 080', name: 'Kalamkari Natural Block & Pen', technique: 'Block Printing', region: 'Andhra Pradesh', colorFamily: 'Ecru', baseHex: '#E5DCCB', accentHex: '#352A24', metallic: 0.03, pattern: 'kalamkari', hours: '31 hrs / meter', notes: 'Iron-jaggery black outline and alum-madder botanical fills printed on myrobalan-treated unbleached cotton.', pairsWith: ['111', '060', '124'] },
+      { id: '124', code: 'No. 124', name: 'Godhadi Layered Quilt', technique: 'Kantha', region: 'Maharashtra', colorFamily: 'Earth', baseHex: '#5A4A3D', accentHex: '#C9BFA9', metallic: 0.04, pattern: 'godhadi', hours: '48 hrs / jacket', notes: 'Deccan household quilting tradition combining repurposed saris and coarse cotton with bold geometric running stitches.', pairsWith: ['060', '059', '080'] }
+    ];
+
+    const PRODUCTS = [
+      {
+        id: 'crash-kantha-denim',
+        title: 'Crash Kantha Denim Trouser',
+        season: 'FW26 · HANDWOVEN & STITCHED',
+        priceUSD: 860,
+        meshType: 'trouser',
+        primarySwatchId: '014',
+        swatchIds: ['014', '022'],
+        desc: 'Wide-leg trouser cut from shuttle-loomed Gujarat indigo denim and hand-quilted across the front panels with dense Crash Kantha running stitch. Every trouser varies subtly in slub rhythm and seam tension.',
+        sizes: [
+          { label: '28', inStock: true },
+          { label: '30', inStock: true },
+          { label: '31', inStock: false },
+          { label: '32', inStock: true },
+          { label: '33', inStock: false },
+          { label: '34', inStock: true },
+          { label: '36', inStock: false }
+        ],
+        specs: [
+          ['Fabric Origin', 'Gujarat handloom denim · Bengal Kantha finish'],
+          ['Craft Hours', '~54 hours handwork per trouser'],
+          ['Dye & Patina', 'Natural fermented indigo; softens & ridges over 24+ months'],
+          ['3D Capture Note', 'Phase 3 candidate — real stitch relief via photometric normal map']
+        ]
+      },
+      {
+        id: 'atma-tote',
+        title: 'Brown Leather Atma Tote',
+        season: 'CORE · SHOPIFY 3D PHASE 2 PILOT',
+        priceUSD: 640,
+        meshType: 'tote',
+        primarySwatchId: '124',
+        swatchIds: ['124', '060'],
+        desc: 'Structured everyday tote crafted from vegetable-tanned Indian buffalo leather with hand-waxed linen saddle stitching, unlacquered brass rivets, and an interior Godhadi quilt pocket. Ideal rigid form for native Shopify 3D GLB/USDZ inspection.',
+        sizes: [
+          { label: 'OS', inStock: true }
+        ],
+        specs: [
+          ['Material', 'Vegetable-tanned full-grain leather + Godhadi cotton lining'],
+          ['Hardware', 'Solid cast matte brass rivets'],
+          ['Shopify 3D Spec', 'GLB < 4 MB, Draco OFF (guarantees iOS AR USDZ conversion)'],
+          ['Dimensions', '38 cm W × 42 cm H × 13 cm D']
+        ]
+      },
+      {
+        id: 'kantha-overcoat',
+        title: 'Kantha Overcoat',
+        season: 'FW26 · PARIS RUNWAY LOOK 04',
+        priceUSD: 1150,
+        meshType: 'coat',
+        primarySwatchId: '059',
+        swatchIds: ['059', '008'],
+        desc: 'Relaxed raglan overcoat constructed from vintage hand-stitched Kantha panels reinforced with subtle Zardozi collar tacking. Photographed on a carved wooden medallion hook at the New Delhi studio.',
+        sizes: [
+          { label: 'XS', inStock: false },
+          { label: 'S', inStock: true },
+          { label: 'M', inStock: true },
+          { label: 'L', inStock: false },
+          { label: 'XL', inStock: true }
+        ],
+        specs: [
+          ['Fabric Origin', 'West Bengal vintage Kantha · Uttar Pradesh Zardozi'],
+          ['Craft Hours', '~82 hours combined handwork'],
+          ['Fit', 'Generous dropped shoulder; unlined interior French seams'],
+          ['Edition', 'Small-batch numbered interior cotton tape']
+        ]
+      },
+      {
+        id: 'indigo-check-shirt',
+        title: 'Indigo Check Shirt',
+        season: 'FW26 · SOLD-OUT WAITLIST DEMO',
+        priceUSD: 480,
+        meshType: 'shirt',
+        primarySwatchId: '075',
+        swatchIds: ['075', '019'],
+        desc: 'Handloom cotton check shirt woven in natural indigo with fine supplementary zari threads and Rabari cuff reinforcement. Currently sold out across core sizes—request a made-to-order loom slot below.',
+        sizes: [
+          { label: 'XS', inStock: false },
+          { label: 'S', inStock: false },
+          { label: 'M', inStock: false },
+          { label: 'L', inStock: false },
+          { label: 'XL', inStock: true }
+        ],
+        specs: [
+          ['Fabric Origin', 'Uttar Pradesh handloom · Gujarat Rabari cuff stitch'],
+          ['Batch Model', 'Made-to-order waitlist captures demand before dye lot runs'],
+          ['Buttons', 'Carved natural mother-of-pearl'],
+          ['Lead Time', '3–4 weeks for commissioned restock batches']
+        ]
+      }
+    ];
+
+    const RACK_PIECES = [
+      { id: 'ooak-01', index: '01', title: '01/01 Vintage Kantha Chore Jacket', priceUSD: 790, swatchId: '059', size: 'L (Boxy)', location: '61 Orchard St, NYC', note: 'Cut from a 1970s indigo-and-madder domestic quilt; visible hand-darned patch near left pocket.' },
+      { id: 'ooak-02', index: '02', title: '01/01 Upcycled Chintz Canvas Coat', priceUSD: 1450, swatchId: '080', size: 'M / L', location: 'GK2, New Delhi', note: 'Repurposed hand-painted Kalamkari floral panel backed with heavy unbleached cotton canvas.' },
+      { id: 'ooak-03', index: '03', title: '01/01 Crash Kantha Studio Blazer', priceUSD: 980, swatchId: '014', size: 'M', location: '61 Orchard St, NYC', note: 'Unstructured three-button workwear blazer with asymmetrical diagonal Kantha tension lines.' },
+      { id: 'ooak-04', index: '04', title: '01/01 Shisha Mirror Overshirt', priceUSD: 840, swatchId: '030', size: 'L', location: 'GK2, New Delhi', note: 'Dense Rajasthan glasswork cluster across back yoke; raw selvedge hem.' },
+      { id: 'ooak-05', index: '05', title: '01/01 Godhadi Quilt Utility Vest', priceUSD: 620, swatchId: '124', size: 'S / M', location: '61 Orchard St, NYC', note: 'Thick five-layer Deccan cotton quilt reversible to faded ochre sari interior.' },
+      { id: 'ooak-06', index: '06', title: '01/01 Zardozi Collar Work Jacket', priceUSD: 1190, swatchId: '008', size: 'XL', location: '61 Orchard St, NYC', note: 'Matte black handwoven twill anchored by oxidized gold bullion embroidery on lapel.' }
+    ];
+
+    const INDIA_REGIONS = [
+      { name: 'Uttarakhand',    x: 192, y: 102, crafts: ['Hand Knitting', 'Felted Wool'], swatches: [], seasons: ['FW25', 'FW26'], note: 'Himalayan brushed wool and Almora hand-knitted outerwear layers.' },
+      { name: 'Uttar Pradesh',  x: 218, y: 148, crafts: ['Zardozi Embroidery', 'Benarasi Weave', 'Chikankari'], swatches: ['008', '015', '075'], seasons: ['SS25', 'FW25', 'FW26'], note: 'Varanasi and Lucknow master workshops producing silk brocade, zari checks, and metallic Zardozi.' },
+      { name: 'Rajasthan',      x: 124, y: 164, crafts: ['Block Printing', 'Mirror Embroidery'], swatches: ['030'], seasons: ['SS25', 'SS26', 'FW26'], note: 'Jaipur wooden block carving, natural alum/iron dyes, and hand-cut Shisha mirror work.' },
+      { name: 'Gujarat',        x: 92,  y: 212, crafts: ['Handloom Denim', 'Rabari Stitching', 'Bandhani', 'Kala Cotton'], swatches: ['022', '019', '005'], seasons: ['SS25', 'FW25', 'SS26', 'FW26'], note: 'Kutch rain-fed Kala cotton, shuttle-loomed indigo denim, and pastoral Rabari stitchwork.' },
+      { name: 'Madhya Pradesh', x: 176, y: 212, crafts: ['Handloom Weaving', 'Chanderi Silk-Cotton'], swatches: [], seasons: ['SS26'], note: 'Featherweight translucent cotton-silk weaves used for summer shirting.' },
+      { name: 'Bihar',          x: 274, y: 168, crafts: ['Sujani Kantha', 'Tussar Silk'], swatches: [], seasons: ['FW25', 'FW26'], note: 'Fine narrative Sujani running stitches and textured Bhagalpur wild silk.' },
+      { name: 'West Bengal',    x: 300, y: 204, crafts: ['Kantha', 'Crash Kantha', 'Handwoven Cotton'], swatches: ['059', '014'], seasons: ['SS25', 'FW25', 'SS26', 'FW26'], note: 'Core partner cluster for vintage Kantha quilt repurposing and heavy Crash Kantha denim.' },
+      { name: 'Maharashtra',    x: 136, y: 268, crafts: ['Godhadi Quilt', 'Handwoven Twill'], swatches: ['124'], seasons: ['FW26'], note: 'Deccan layered cotton quilting adapted into outerwear linings and utility vests.' },
+      { name: 'Karnataka',      x: 146, y: 334, crafts: ['Kasuti Embroidery', 'Ilkal Weave'], swatches: ['060'], seasons: ['SS26', 'FW26'], note: 'North Karnataka counted-thread Kasuti geometric motifs on raw cotton shirting.' },
+      { name: 'Andhra Pradesh', x: 196, y: 316, crafts: ['Kalamkari', 'Ikat Cotton'], swatches: ['080'], seasons: ['SS26', 'FW26'], note: 'Natural myrobalan and madder Kalamkari prints and hand-resist Ikat textiles.' },
+      { name: 'Tamil Nadu',     x: 174, y: 392, crafts: ['Handwoven Madras Plaid'], swatches: [], seasons: ['SS25', 'SS26'], note: 'Bleeding natural-dye Madras cotton checks woven on pit looms.' }
+    ];
+
+    const ARCHIVE_SEASONS = [
+      { code: 'FW27 (UPCOMING)', title: 'Pitti Immagine Uomo 111 — Florence', date: 'Jan 13, 2027', summary: 'Guest Designer presentation in Florence exploring an exchange in reverse: Indian handloom and embroidery arriving as authored contemporary architecture.' },
+      { code: 'FW26', title: 'Raag — Paris Fashion Week Menswear', date: 'Jan 2026', summary: 'Official PFW calendar presentation anchored by Crash Kantha denim, brushed merino tailoring, and Zardozi chore silhouettes.' },
+      { code: 'SS26', title: 'The Craftsperson Off-Duty', date: 'Jun 2025', summary: 'A study of the effortless utility wardrobes worn inside partner ateliers—loose handloom poplin, Kasuti yokes, and raw silk-cotton layers.' },
+      { code: 'SS25', title: 'Pilgrimage Hybridity', date: 'Jun 2024', summary: 'Marigold garlands over sneakers, hand-knitted cardigans paired with pleated safari trousers, celebrating everyday Indian mix-and-match dress.' },
+      { code: 'CAPSULE 2026', title: 'Dover Street Market London — Upcycled Palampore', date: 'May 2026', summary: '15 singular one-of-a-kind jackets cut from archival chintz and palampore panels alongside 30 hand-embroidered Chuck Taylors.' },
+      { code: 'RETAIL 2025', title: '61 Orchard Street — New York Flagship', date: 'Apr 2025', summary: 'First US physical space in the Lower East Side built with limewash plaster, raw timber rails, and Indian metal vessels.' }
+    ];
+
+    /* =========================================================================
+       2. PROCEDURAL PBR TEXTILE & STUDIO PLATE GENERATOR + SOBEL SOLVER
+       Produces genuine Albedo, Normal (tangent-space), and Roughness canvases
+       so WebGL raking light works sharply even before real studio files load.
+    ========================================================================= */
+    const TEXTURE_CACHE = {};
+
+    function hexToRgb(hex) {
+      const h = hex.replace('#', '');
+      return [
+        parseInt(h.slice(0, 2), 16),
+        parseInt(h.slice(2, 4), 16),
+        parseInt(h.slice(4, 6), 16)
+      ];
+    }
+
+    // Deterministic pseudo-random so textures look consistent across reloads
+    function mulberry32(seed) {
+      let a = seed >>> 0;
+      return function () {
+        a |= 0; a = (a + 0x6D2B79F5) | 0;
+        let t = Math.imul(a ^ (a >>> 15), 1 | a);
+        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      };
+    }
+
+    // Real in-browser Sobel normal map generator (used both for procedural heightmaps & uploaded real photos!)
+    function heightToNormalCanvas(heightField, size, strength) {
+      const c = document.createElement('canvas');
+      c.width = size; c.height = size;
+      const ctx = c.getContext('2d');
+      const img = ctx.createImageData(size, size);
+      const d = img.data;
+
+      const sample = (x, y) => {
+        const cx = (x + size) % size;
+        const cy = (y + size) % size;
+        return heightField[cy * size + cx];
+      };
+
+      for (let y = 0; y < size; y++) {
+        for (let x = 0; x < size; x++) {
+          const tl = sample(x - 1, y - 1), t = sample(x, y - 1), tr = sample(x + 1, y - 1);
+          const l  = sample(x - 1, y),                           r  = sample(x + 1, y);
+          const bl = sample(x - 1, y + 1), b = sample(x, y + 1), br = sample(x + 1, y + 1);
+
+          const dx = (tr + 2 * r + br) - (tl + 2 * l + bl);
+          const dy = (bl + 2 * b + br) - (tl + 2 * t + tr);
+
+          let nx = -dx * strength;
+          let ny = -dy * strength;
+          let nz = 1.0;
+          const invLen = 1.0 / Math.sqrt(nx * nx + ny * ny + nz * nz);
+          nx *= invLen; ny *= invLen; nz *= invLen;
+
+          const i = (y * size + x) * 4;
+          d[i]     = Math.round((nx * 0.5 + 0.5) * 255);
+          d[i + 1] = Math.round((ny * 0.5 + 0.5) * 255);
+          d[i + 2] = Math.round((nz * 0.5 + 0.5) * 255);
+          d[i + 3] = 255;
+        }
+      }
+      ctx.putImageData(img, 0, 0);
+      return c;
+    }
+
+    // Convert any uploaded real Kartik Research JPG/PNG into Albedo + Sobel Normal + Roughness
+    function buildPBRFromUploadedImage(imageEl, strength) {
+      const size = 512;
+      const albedoC = document.createElement('canvas');
+      albedoC.width = size; albedoC.height = size;
+      const aCtx = albedoC.getContext('2d');
+
+      // Center-crop cover into square 512x512
+      const scale = Math.max(size / imageEl.naturalWidth, size / imageEl.naturalHeight);
+      const w = imageEl.naturalWidth * scale;
+      const h = imageEl.naturalHeight * scale;
+      aCtx.drawImage(imageEl, (size - w) / 2, (size - h) / 2, w, h);
+
+      const src = aCtx.getImageData(0, 0, size, size).data;
+      const height = new Float32Array(size * size);
+      const roughC = document.createElement('canvas');
+      roughC.width = size; roughC.height = size;
+      const rCtx = roughC.getContext('2d');
+      const rImg = rCtx.createImageData(size, size);
+
+      for (let i = 0; i < size * size; i++) {
+        const p = i * 4;
+        const r = src[p] / 255, g = src[p + 1] / 255, b = src[p + 2] / 255;
+        const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+        height[i] = lum;
+        // High-luminance gold/mirror highlights get lower roughness so they glint realistically
+        const rough = Math.max(0.22, Math.min(0.94, 0.92 - Math.pow(lum, 2.2) * 0.55));
+        const rv = Math.round(rough * 255);
+        rImg.data[p] = rv; rImg.data[p + 1] = rv; rImg.data[p + 2] = rv; rImg.data[p + 3] = 255;
+      }
+      rCtx.putImageData(rImg, 0, 0);
+
+      const normalC = heightToNormalCanvas(height, size, strength || 2.4);
+      return {
+        albedoCanvas: albedoC,
+        normalCanvas: normalC,
+        roughCanvas: roughC,
+        dataUrl: albedoC.toDataURL('image/jpeg', 0.92)
+      };
+    }
+
+    function getSwatchPBR(swatchId) {
+      if (TEXTURE_CACHE[swatchId]) return TEXTURE_CACHE[swatchId];
+      const sw = SWATCHES.find(s => s.id === swatchId) || SWATCHES[0];
+      const size = 512;
+      const rand = mulberry32(parseInt(sw.id, 10) * 7919 + 13);
+
+      const albedoC = document.createElement('canvas');
+      albedoC.width = size; albedoC.height = size;
+      const ctx = albedoC.getContext('2d');
+
+      const roughC = document.createElement('canvas');
+      roughC.width = size; roughC.height = size;
+      const rCtx = roughC.getContext('2d');
+
+      const baseRGB = hexToRgb(sw.baseHex);
+      const accRGB = hexToRgb(sw.accentHex);
+
+      // Base handloom warp/weft grain + organic slubs
+      const aImg = ctx.createImageData(size, size);
+      const rImg = rCtx.createImageData(size, size);
+      const height = new Float32Array(size * size);
+
+      const warpSlub = new Float32Array(size);
+      const weftSlub = new Float32Array(size);
+      for (let i = 0; i < size; i++) {
+        warpSlub[i] = (rand() - 0.5) * 0.16;
+        weftSlub[i] = (rand() - 0.5) * 0.16;
+      }
+
+      for (let y = 0; y < size; y++) {
+        for (let x = 0; x < size; x++) {
+          const idx = y * size + x;
+          const twill = sw.pattern === 'denim' ? ((x + y) % 6 < 3 ? 1 : -1) : (((x >> 2) + (y >> 2)) % 2 === 0 ? 1 : -1);
+          const weave = Math.sin(x * 0.85) * 0.14 + Math.cos(y * 0.85) * 0.14 + twill * 0.08;
+          const slub = warpSlub[x] + weftSlub[y];
+          const dyeVar = Math.sin(x * 0.018 + y * 0.012) * 0.07 + (rand() - 0.5) * 0.05;
+          const h = 0.42 + weave * 0.25 + slub * 0.35 + dyeVar * 0.15;
+          height[idx] = Math.max(0, Math.min(1, h));
+
+          const shade = 1 + weave * 0.14 + slub * 0.28 + dyeVar;
+          const p = idx * 4;
+          aImg.data[p]     = Math.max(0, Math.min(255, baseRGB[0] * shade));
+          aImg.data[p + 1] = Math.max(0, Math.min(255, baseRGB[1] * shade));
+          aImg.data[p + 2] = Math.max(0, Math.min(255, baseRGB[2] * shade));
+          aImg.data[p + 3] = 255;
+
+          const baseRough = Math.round((0.88 + (rand() - 0.5) * 0.08) * 255);
+          rImg.data[p] = baseRough; rImg.data[p + 1] = baseRough; rImg.data[p + 2] = baseRough; rImg.data[p + 3] = 255;
+        }
+      }
+      ctx.putImageData(aImg, 0, 0);
+      rCtx.putImageData(rImg, 0, 0);
+
+      // Stamp authentic craft topography onto albedo, height, and roughness
+      const stampStitch = (x1, y1, x2, y2, thickness, color, roughVal, bumpAdd) => {
+        ctx.strokeStyle = color;
+        ctx.lineWidth = thickness;
+        ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+
+        rCtx.strokeStyle = `rgb(${roughVal},${roughVal},${roughVal})`;
+        rCtx.lineWidth = thickness + 0.5;
+        rCtx.lineCap = 'round';
+        rCtx.beginPath(); rCtx.moveTo(x1, y1); rCtx.lineTo(x2, y2); rCtx.stroke();
+
+        const steps = Math.max(4, Math.ceil(Math.hypot(x2 - x1, y2 - y1)));
+        for (let s = 0; s <= steps; s++) {
+          const t = s / steps;
+          const cx = Math.round(x1 + (x2 - x1) * t);
+          const cy = Math.round(y1 + (y2 - y1) * t);
+          const rad = Math.ceil(thickness * 0.8);
+          for (let oy = -rad; oy <= rad; oy++) {
+            for (let ox = -rad; ox <= rad; ox++) {
+              const px = cx + ox, py = cy + oy;
+              if (px >= 0 && px < size && py >= 0 && py < size) {
+                const dist = Math.hypot(ox, oy) / (rad + 0.5);
+                if (dist < 1) {
+                  height[py * size + px] = Math.min(1, height[py * size + px] + bumpAdd * (1 - dist * dist));
+                }
+              }
+            }
+          }
+        }
+      };
+
+      if (sw.pattern === 'kantha' || sw.pattern === 'crash-kantha' || sw.pattern === 'godhadi') {
+        const isCrash = sw.pattern === 'crash-kantha';
+        const rowGap = isCrash ? 14 : 18;
+        for (let row = 8; row < size; row += rowGap) {
+          let x = rand() * 8;
+          const waveAmp = isCrash ? 7 : 3.5;
+          const color = (row % (rowGap * 3) === 0) ? sw.accentHex : (isCrash ? '#C8BFA8' : '#E7E0D2');
+          while (x < size - 6) {
+            const len = 8 + rand() * 9;
+            const y0 = row + Math.sin(x * 0.025 + row * 0.1) * waveAmp + (rand() - 0.5) * 1.5;
+            const y1 = row + Math.sin((x + len) * 0.025 + row * 0.1) * waveAmp + (rand() - 0.5) * 1.5;
+            stampStitch(x, y0, x + len, y1, 2.2, color, 205, 0.42);
+            x += len + 5 + rand() * 5;
+          }
+        }
+      } else if (sw.pattern === 'zardozi' || sw.pattern === 'benarasi') {
+        // Metallic gold bullion floral/paisley motifs with low roughness (45) so they flash under grazing light
+        for (let gy = 56; gy < size; gy += 96) {
+          for (let gx = 56; gx < size; gx += 96) {
+            const ox = gx + (rand() - 0.5) * 12;
+            const oy = gy + (rand() - 0.5) * 12;
+            for (let k = 0; k < 8; k++) {
+              const ang = (k / 8) * Math.PI * 2;
+              const x1 = ox + Math.cos(ang) * 7;
+              const y1 = oy + Math.sin(ang) * 7;
+              const x2 = ox + Math.cos(ang) * 24;
+              const y2 = oy + Math.sin(ang) * 24;
+              stampStitch(x1, y1, x2, y2, 3.2, sw.accentHex, 42, 0.52);
+            }
+            stampStitch(ox - 2, oy, ox + 2, oy, 4.5, '#E4C883', 32, 0.58);
+          }
+        }
+      } else if (sw.pattern === 'mirror') {
+        // Shisha hand-cut glasswork: ultra-low roughness disc surrounded by matte cotton ring
+        for (let gy = 48; gy < size; gy += 84) {
+          for (let gx = 48; gx < size; gx += 84) {
+            const cx = gx + ((gy / 84) % 2) * 32;
+            const cy = gy;
+            // Ring of cotton buttonhole stitches
+            for (let k = 0; k < 14; k++) {
+              const a = (k / 14) * Math.PI * 2;
+              stampStitch(cx + Math.cos(a) * 11, cy + Math.sin(a) * 11, cx + Math.cos(a) * 17, cy + Math.sin(a) * 17, 2.3, '#D58F42', 210, 0.48);
+            }
+            // Glass disc
+            ctx.fillStyle = '#CFD7DF';
+            ctx.beginPath(); ctx.arc(cx, cy, 10, 0, Math.PI * 2); ctx.fill();
+            rCtx.fillStyle = 'rgb(16,16,16)';
+            rCtx.beginPath(); rCtx.arc(cx, cy, 10, 0, Math.PI * 2); rCtx.fill();
+          }
+        }
+      } else if (sw.pattern === 'kasuti' || sw.pattern === 'rabari') {
+        const step = 64;
+        for (let gy = 32; gy < size; gy += step) {
+          for (let gx = 32; gx < size; gx += step) {
+            const r = 18;
+            stampStitch(gx, gy - r, gx + r, gy, 2.2, sw.accentHex, 195, 0.4);
+            stampStitch(gx + r, gy, gx, gy + r, 2.2, sw.accentHex, 195, 0.4);
+            stampStitch(gx, gy + r, gx - r, gy, 2.2, sw.accentHex, 195, 0.4);
+            stampStitch(gx - r, gy, gx, gy - r, 2.2, sw.accentHex, 195, 0.4);
+            stampStitch(gx - 6, gy, gx + 6, gy, 2.0, sw.accentHex, 195, 0.35);
+          }
+        }
+      } else if (sw.pattern === 'zari-indigo') {
+        for (let i = 24; i < size; i += 48) {
+          stampStitch(i, 0, i, size, 1.4, sw.accentHex, 55, 0.28);
+          stampStitch(0, i, size, i, 1.4, sw.accentHex, 55, 0.28);
+        }
+      } else if (sw.pattern === 'bandhani') {
+        for (let gy = 22; gy < size; gy += 38) {
+          for (let gx = 22; gx < size; gx += 38) {
+            const ox = gx + (rand() - 0.5) * 4, oy = gy + (rand() - 0.5) * 4;
+            ctx.strokeStyle = sw.accentHex;
+            ctx.lineWidth = 2.6;
+            ctx.beginPath(); ctx.arc(ox, oy, 6, 0, Math.PI * 2); ctx.stroke();
+            stampStitch(ox - 1, oy, ox + 1, oy, 3.0, sw.baseHex, 215, 0.45);
+          }
+        }
+      } else if (sw.pattern === 'kalamkari') {
+        for (let gy = 48; gy < size; gy += 96) {
+          for (let gx = 48; gx < size; gx += 96) {
+            ctx.strokeStyle = sw.accentHex;
+            ctx.lineWidth = 1.6;
+            ctx.beginPath(); ctx.ellipse(gx, gy, 24, 12, Math.PI / 4, 0, Math.PI * 2); ctx.stroke();
+            ctx.fillStyle = '#8C3B2D';
+            ctx.beginPath(); ctx.arc(gx, gy, 5, 0, Math.PI * 2); ctx.fill();
+          }
+        }
+      }
+
+      const normalC = heightToNormalCanvas(height, size, 3.0);
+      const bundle = {
+        albedoCanvas: albedoC,
+        normalCanvas: normalC,
+        roughCanvas: roughC,
+        dataUrl: albedoC.toDataURL('image/jpeg', 0.92)
+      };
+      TEXTURE_CACHE[swatchId] = bundle;
+      return bundle;
+    }
+
+    // Generate clean architectural studio garment plate (used as Photo-First until real photos are dropped in)
+    const PRODUCT_PLATE_CACHE = {};
+    function getProductStudioPhoto(product) {
+      if (KR_STUDIO_ASSETS.products[product.id] && KR_STUDIO_ASSETS.products[product.id].photo) {
+        return KR_STUDIO_ASSETS.products[product.id].photo;
+      }
+      if (PRODUCT_PLATE_CACHE[product.id]) return PRODUCT_PLATE_CACHE[product.id];
+
+      const W = 900, H = 1040;
+      const c = document.createElement('canvas');
+      c.width = W; c.height = H;
+      const ctx = c.getContext('2d');
+
+      // Dry gallery plaster backdrop
+      const bg = ctx.createLinearGradient(0, 0, 0, H);
+      bg.addColorStop(0, '#F3F1EC');
+      bg.addColorStop(1, '#E8E5DD');
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, W, H);
+
+      const swTex = getSwatchPBR(product.primarySwatchId).albedoCanvas;
+      const pat = ctx.createPattern(swTex, 'repeat');
+
+      ctx.save();
+      ctx.fillStyle = pat;
+      ctx.strokeStyle = 'rgba(20,20,19,0.28)';
+      ctx.lineWidth = 1.5;
+
+      // Subtle contact shadow on wall
+      ctx.shadowColor = 'rgba(20,20,19,0.14)';
+      ctx.shadowBlur = 24;
+      ctx.shadowOffsetY = 14;
+
+      if (product.meshType === 'tote') {
+        // Vegetable-tanned leather Atma Tote silhouette
+        ctx.fillStyle = '#563623';
+        ctx.beginPath();
+        ctx.moveTo(260, 340); ctx.lineTo(640, 340); ctx.lineTo(605, 845); ctx.lineTo(295, 845); ctx.closePath();
+        ctx.fill();
+        ctx.shadowColor = 'transparent';
+        ctx.strokeStyle = '#331D11'; ctx.lineWidth = 2; ctx.stroke();
+
+        // Rolled leather handles
+        ctx.strokeStyle = '#4B2D1C'; ctx.lineWidth = 22; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(350, 350); ctx.bezierCurveTo(350, 155, 550, 155, 550, 350); ctx.stroke();
+        // Brass rivets
+        ctx.fillStyle = '#B89756';
+        [[350, 378], [550, 378], [350, 412], [550, 412]].forEach(([rx, ry]) => {
+          ctx.beginPath(); ctx.arc(rx, ry, 7, 0, Math.PI * 2); ctx.fill();
+        });
+        // Hand-waxed saddle stitch seam
+        ctx.setLineDash([7, 6]); ctx.strokeStyle = '#C9B192'; ctx.lineWidth = 1.8;
+        ctx.strokeRect(284, 362, 332, 460);
+        ctx.setLineDash([]);
+      } else if (product.meshType === 'trouser') {
+        // Wide-leg Crash Kantha Denim Trouser
+        ctx.beginPath();
+        ctx.moveTo(290, 175); ctx.lineTo(610, 175);
+        ctx.lineTo(642, 875); ctx.lineTo(486, 875);
+        ctx.lineTo(450, 420); ctx.lineTo(414, 875);
+        ctx.lineTo(258, 875); ctx.closePath();
+        ctx.fill();
+        ctx.shadowColor = 'transparent';
+        ctx.stroke();
+        // Waistband + fly seam
+        ctx.strokeStyle = 'rgba(235,228,215,0.45)'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(290, 220); ctx.lineTo(610, 220); ctx.moveTo(450, 175); ctx.lineTo(450, 360); ctx.stroke();
+      } else {
+        // Hanging Overcoat / Shirt on carved wooden hook
+        ctx.shadowColor = 'transparent';
+        ctx.fillStyle = '#73533B';
+        ctx.beginPath(); ctx.arc(450, 126, 20, 0, Math.PI * 2); ctx.fill();
+
+        ctx.shadowColor = 'rgba(20,20,19,0.14)';
+        ctx.fillStyle = pat;
+        ctx.beginPath();
+        ctx.moveTo(395, 165); ctx.lineTo(505, 165);
+        ctx.lineTo(670, 235); ctx.lineTo(745, 620); ctx.lineTo(645, 645);
+        ctx.lineTo(605, 395); ctx.lineTo(615, product.meshType === 'coat' ? 880 : 750);
+        ctx.lineTo(285, product.meshType === 'coat' ? 880 : 750);
+        ctx.lineTo(295, 395); ctx.lineTo(255, 645); ctx.lineTo(155, 620);
+        ctx.lineTo(230, 235); ctx.closePath();
+        ctx.fill();
+        ctx.shadowColor = 'transparent';
+        ctx.stroke();
+        // Center placket & buttons
+        ctx.strokeStyle = 'rgba(20,20,19,0.35)';
+        ctx.beginPath(); ctx.moveTo(450, 195); ctx.lineTo(450, product.meshType === 'coat' ? 880 : 750); ctx.stroke();
+      }
+      ctx.restore();
+
+      // Quiet archival plate stamp (bottom corner)
+      ctx.fillStyle = '#6E6C66';
+      ctx.font = '11px Menlo, monospace';
+      ctx.fillText(`PLATE ${product.id.toUpperCase()}  /  SWATCH ${product.primarySwatchId}  /  DROP REAL PHOTO VIA STUDIO ASSETS`, 24, H - 24);
+
+      const url = c.toDataURL('image/jpeg', 0.92);
+      PRODUCT_PLATE_CACHE[product.id] = url;
+      return url;
+    }
+
+    /* =========================================================================
+       3. WEBGL MANAGER — SINGLE ACTIVE CONTEXT, ZERO LEAKS, OFFLINE 2D FALLBACK
+    ========================================================================= */
+    const WebGLMgr = {
+      rafId: null,
+      cleanupFn: null,
+      dispose() {
+        if (this.rafId) {
+          cancelAnimationFrame(this.rafId);
+          this.rafId = null;
+        }
+        if (this.cleanupFn) {
+          try { this.cleanupFn(); } catch (_) {}
+          this.cleanupFn = null;
+        }
+      }
+    };
+
+    // Photometric Raking-Light Cloth Engine (GLSL WebGL + automatic 2D Canvas fallback)
+    function mountRakingLightViewer(hostEl, pbr, options) {
+      WebGLMgr.dispose();
+      hostEl.innerHTML = '';
+
+      const opts = Object.assign({ zoom: 1.0, onTelemetry: null }, options || {});
+      const state = {
+        lx: 0.25, ly: 0.25, tx: 0.25, ty: 0.25,
+        zoom: opts.zoom, targetZoom: opts.zoom,
+        panX: 0, panY: 0
+      };
+
+      const onMove = (clientX, clientY) => {
+        const rect = hostEl.getBoundingClientRect();
+        if (!rect.width || !rect.height) return;
+        const nx = ((clientX - rect.left) / rect.width) * 2 - 1;
+        const ny = -(((clientY - rect.top) / rect.height) * 2 - 1);
+        state.tx = Math.max(-1, Math.min(1, nx));
+        state.ty = Math.max(-1, Math.min(1, ny));
+      };
+
+      const handlePointer = (e) => onMove(e.clientX, e.clientY);
+      const handleTouch = (e) => { if (e.touches[0]) onMove(e.touches[0].clientX, e.touches[0].clientY); };
+      hostEl.addEventListener('pointermove', handlePointer);
+      hostEl.addEventListener('touchmove', handleTouch, { passive: true });
+
+      // Fallback if Three.js CDN is unreachable offline
+      if (typeof THREE === 'undefined') {
+        const c = document.createElement('canvas');
+        c.width = hostEl.clientWidth || 600;
+        c.height = hostEl.clientHeight || 500;
+        hostEl.appendChild(c);
+        const ctx = c.getContext('2d');
+        const draw2D = () => {
+          state.lx += (state.tx - state.lx) * 0.12;
+          state.ly += (state.ty - state.ly) * 0.12;
+          ctx.drawImage(pbr.albedoCanvas, 0, 0, c.width, c.height);
+          const gx = (state.lx * 0.5 + 0.5) * c.width;
+          const gy = (-state.ly * 0.5 + 0.5) * c.height;
+          const grad = ctx.createRadialGradient(gx, gy, 10, gx, gy, c.width * 0.7);
+          grad.addColorStop(0, 'rgba(255,244,225,0.28)');
+          grad.addColorStop(1, 'rgba(20,20,19,0.28)');
+          ctx.fillStyle = grad;
+          ctx.fillRect(0, 0, c.width, c.height);
+          WebGLMgr.rafId = requestAnimationFrame(draw2D);
+        };
+        draw2D();
+        WebGLMgr.cleanupFn = () => {
+          hostEl.removeEventListener('pointermove', handlePointer);
+          hostEl.removeEventListener('touchmove', handleTouch);
+          hostEl.innerHTML = '';
+        };
+        return { setZoom: () => {} };
+      }
+
+      const width = hostEl.clientWidth || 640;
+      const height = hostEl.clientHeight || 520;
+      const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      renderer.setSize(width, height);
+      hostEl.appendChild(renderer.domElement);
+
+      const scene = new THREE.Scene();
+      const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 10);
+      camera.position.z = 1;
+
+      const mkTex = (canvas) => {
+        const t = new THREE.CanvasTexture(canvas);
+        t.wrapS = THREE.RepeatWrapping;
+        t.wrapT = THREE.RepeatWrapping;
+        t.needsUpdate = true;
+        return t;
+      };
+      const albedoTex = mkTex(pbr.albedoCanvas);
+      const normalTex = mkTex(pbr.normalCanvas);
+      const roughTex  = mkTex(pbr.roughCanvas);
+
+      const material = new THREE.ShaderMaterial({
+        uniforms: {
+          uAlbedo:     { value: albedoTex },
+          uNormal:     { value: normalTex },
+          uRoughness:  { value: roughTex },
+          uLightPos:   { value: new THREE.Vector3(0.25, 0.25, 0.34) },
+          uAspect:     { value: width / height },
+          uZoom:       { value: state.zoom },
+          uLightColor: { value: new THREE.Color('#FFF2DF') }, // Warm 3200K gallery lamp
+          uSheenColor: { value: new THREE.Color('#EAE3D6') }  // Dry cotton rim scatter
+        },
+        vertexShader: `
+          varying vec2 vUv;
+          varying vec2 vPos;
+          void main() {
+            vUv = uv;
+            vPos = position.xy;
+            gl_Position = vec4(position.xy, 0.0, 1.0);
+          }
+        `,
+        fragmentShader: `
+          uniform sampler2D uAlbedo;
+          uniform sampler2D uNormal;
+          uniform sampler2D uRoughness;
+          uniform vec3 uLightPos;
+          uniform float uAspect;
+          uniform float uZoom;
+          uniform vec3 uLightColor;
+          uniform vec3 uSheenColor;
+          varying vec2 vUv;
+          varying vec2 vPos;
+
+          void main() {
+            // Aspect-correct cover UV centered at (0.5, 0.5)
+            vec2 centered = vUv - 0.5;
+            if (uAspect > 1.0) { centered.y /= uAspect; } else { centered.x *= uAspect; }
+            vec2 uv = centered / uZoom + 0.5;
+
+            vec3 albedo = texture2D(uAlbedo, uv).rgb;
+            vec3 nMap   = texture2D(uNormal, uv).rgb * 2.0 - 1.0;
+            vec3 N      = normalize(vec3(nMap.x * 1.45, nMap.y * 1.45, max(0.25, nMap.z)));
+            float rough = texture2D(uRoughness, uv).r;
+
+            vec3 fragPos = vec3(vPos.x * uAspect, vPos.y, 0.0);
+            vec3 lightP  = vec3(uLightPos.x * uAspect, uLightPos.y, uLightPos.z);
+            vec3 L       = normalize(lightP - fragPos);
+            vec3 V       = vec3(0.0, 0.0, 1.0);
+            vec3 H       = normalize(L + V);
+
+            float dist   = length(lightP - fragPos);
+            float atten  = 1.0 / (1.0 + 0.22 * dist * dist);
+
+            // Grazing diffuse reveals Kantha stitch topography and handloom slubs
+            float NdotL  = max(dot(N, L), 0.0);
+            // Low-roughness metallic/glass specular for Zardozi bullion & Shisha mirror
+            float specExp = mix(72.0, 5.0, rough);
+            float specStr = pow(1.0 - rough, 2.0) * 1.15;
+            float spec    = pow(max(dot(N, H), 0.0), specExp) * specStr;
+
+            // Soft cotton fiber grazing sheen
+            float grazing = pow(1.0 - max(dot(N, V), 0.0), 2.5);
+            vec3 sheen    = uSheenColor * grazing * 0.12;
+
+            vec3 col = albedo * 0.34 + (albedo * NdotL * 0.92 + spec) * uLightColor * atten + sheen;
+            gl_FragColor = vec4(col, 1.0);
+          }
+        `
+      });
+
+      const geo = new THREE.PlaneGeometry(2, 2);
+      const quad = new THREE.Mesh(geo, material);
+      scene.add(quad);
+
+      const onResize = () => {
+        const w = hostEl.clientWidth || 640;
+        const h = hostEl.clientHeight || 520;
+        renderer.setSize(w, h);
+        material.uniforms.uAspect.value = w / h;
+      };
+      window.addEventListener('resize', onResize);
+
+      const tick = () => {
+        state.lx += (state.tx - state.lx) * 0.11;
+        state.ly += (state.ty - state.ly) * 0.11;
+        state.zoom += (state.targetZoom - state.zoom) * 0.14;
+        material.uniforms.uLightPos.value.set(state.lx * 1.05, state.ly * 1.05, 0.34);
+        material.uniforms.uZoom.value = state.zoom;
+        renderer.render(scene, camera);
+
+        if (opts.onTelemetry) {
+          const az = Math.round(Math.atan2(state.ly, state.lx) * (180 / Math.PI));
+          opts.onTelemetry(`3200K LAMP AZIMUTH ${az}° · ZOOM ${state.zoom.toFixed(1)}×`);
+        }
+        WebGLMgr.rafId = requestAnimationFrame(tick);
+      };
+      tick();
+
+      WebGLMgr.cleanupFn = () => {
+        window.removeEventListener('resize', onResize);
+        hostEl.removeEventListener('pointermove', handlePointer);
+        hostEl.removeEventListener('touchmove', handleTouch);
+        geo.dispose(); material.dispose();
+        albedoTex.dispose(); normalTex.dispose(); roughTex.dispose();
+        renderer.dispose();
+        hostEl.innerHTML = '';
+      };
+
+      return {
+        setZoom(z) { state.targetZoom = z; }
+      };
+    }
+
+    // Procedural 61 Orchard Street Gallery HDRI (gives brass & leather realistic warm reflections with zero external .hdr files)
+    function createGalleryEnvMap(renderer) {
+      const pmrem = new THREE.PMREMGenerator(renderer);
+      pmrem.compileEquirectangularShader();
+
+      const envScene = new THREE.Scene();
+      envScene.background = new THREE.Color('#EAE6DC');
+
+      // Warm limewash room enclosure
+      const roomGeo = new THREE.BoxGeometry(10, 6, 10);
+      const roomMat = new THREE.MeshBasicMaterial({ color: '#DCD6C9', side: THREE.BackSide });
+      envScene.add(new THREE.Mesh(roomGeo, roomMat));
+
+      // 3 Softbox light cards (3200K warm skylight, cool daylight window fill, soft warm rim)
+      const addLightCard = (w, h, pos, rot, r, g, b) => {
+        const geo = new THREE.PlaneGeometry(w, h);
+        const mat = new THREE.MeshBasicMaterial({ color: new THREE.Color().setRGB(r, g, b), side: THREE.DoubleSide });
+        const m = new THREE.Mesh(geo, mat);
+        m.position.set(pos[0], pos[1], pos[2]);
+        m.rotation.set(rot[0], rot[1], rot[2]);
+        envScene.add(m);
+        return { geo, mat };
+      };
+
+      const cards = [
+        addLightCard(4.5, 3.2, [2.2, 2.8, 2.5],  [Math.PI / 3, -Math.PI / 5, 0],  3.2, 2.85, 2.35), // Warm key softbox
+        addLightCard(3.8, 4.0, [-3.8, 1.2, 1.5], [0, Math.PI / 2.2, 0],           1.9, 1.95, 2.05), // Orchard St window fill
+        addLightCard(5.0, 2.0, [0.0, 1.8, -4.0], [0, 0, 0],                       2.4, 2.15, 1.80)  // Warm rim separation
+      ];
+
+      const rt = pmrem.fromScene(envScene, 0.04);
+      pmrem.dispose();
+      roomGeo.dispose();
+      roomMat.dispose();
+      cards.forEach(c => { c.geo.dispose(); c.mat.dispose(); });
+
+      return {
+        texture: rt.texture,
+        dispose() { rt.dispose(); }
+      };
+    }
+
+    // Calibrate imported Blender 4.x GLB materials so cloth stays dry/matte and brass gleams warmly
+    function calibrateGlbMaterials(model, maxAniso) {
+      model.traverse((node) => {
+        if (!node.isMesh) return;
+        node.castShadow = true;
+        node.receiveShadow = true;
+
+        const mats = Array.isArray(node.material) ? node.material : [node.material];
+        mats.forEach((mat) => {
+          if (!mat) return;
+          ['map', 'normalMap', 'roughnessMap', 'metalnessMap'].forEach((slot) => {
+            if (mat[slot]) {
+              mat[slot].anisotropy = maxAniso;
+              mat[slot].needsUpdate = true;
+            }
+          });
+          if (mat.isMeshStandardMaterial) {
+            const isMetal = (mat.metalness || 0) > 0.5;
+            mat.envMapIntensity = isMetal ? 1.15 : 0.42;
+            if (!isMetal && mat.roughness < 0.55) mat.roughness = 0.72; // Prevent plastic CGI shine
+            if (mat.normalMap) mat.normalScale = new THREE.Vector2(1.15, 1.15);
+            mat.needsUpdate = true;
+          }
+        });
+      });
+    }
+
+    // 3D Product Turntable (Loads Blender .GLB with Orchard St Gallery Lighting & Contact Shadows)
+    function mount3DProductTurntable(hostEl, product, customGlbUrl, onStatus) {
+      WebGLMgr.dispose();
+      hostEl.innerHTML = '';
+
+      if (typeof THREE === 'undefined') {
+        hostEl.innerHTML = '<div style="padding:24px;" class="mono-label">Three.js offline — use Photo or Plain Mode.</div>';
+        return null;
+      }
+
+      const width = hostEl.clientWidth || 640;
+      const height = hostEl.clientHeight || 520;
+
+      const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      renderer.setSize(width, height);
+      renderer.outputEncoding = THREE.sRGBEncoding;
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.06;
+      renderer.physicallyCorrectLights = true;
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      hostEl.appendChild(renderer.domElement);
+
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color('#F1EFEA');
+
+      const galleryEnv = createGalleryEnvMap(renderer);
+      scene.environment = galleryEnv.texture;
+
+      const camera = new THREE.PerspectiveCamera(32, width / height, 0.05, 50);
+      camera.position.set(0.18, 0.42, 1.32);
+
+      const controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.065;
+      controls.minDistance = 0.42;
+      controls.maxDistance = 2.8;
+      controls.maxPolarAngle = Math.PI * 0.52;
+      controls.target.set(0, 0.27, 0);
+
+      // Gallery 3-point lighting rig (physically calibrated)
+      const hemi = new THREE.HemisphereLight('#FFFDF7', '#C8C2B5', 0.65);
+      scene.add(hemi);
+
+      const keyLight = new THREE.DirectionalLight('#FFF0DA', 2.45);
+      keyLight.position.set(1.6, 2.4, 1.8);
+      keyLight.castShadow = true;
+      keyLight.shadow.mapSize.set(1024, 1024);
+      keyLight.shadow.camera.near = 0.5;
+      keyLight.shadow.camera.far = 8.0;
+      const d = 0.75;
+      keyLight.shadow.camera.left = -d;
+      keyLight.shadow.camera.right = d;
+      keyLight.shadow.camera.top = d;
+      keyLight.shadow.camera.bottom = -d;
+      keyLight.shadow.bias = -0.0004;
+      scene.add(keyLight);
+
+      const fillLight = new THREE.DirectionalLight('#E7ECF2', 0.85);
+      fillLight.position.set(-2.2, 1.2, 1.4);
+      scene.add(fillLight);
+
+      const rimLight = new THREE.DirectionalLight('#FFF5E6', 1.15);
+      rimLight.position.set(-0.6, 1.8, -2.2);
+      scene.add(rimLight);
+
+      // Seamless shadow-catcher floor (no harsh grey disc)
+      const shadowGeo = new THREE.PlaneGeometry(4, 4);
+      const shadowMat = new THREE.ShadowMaterial({ opacity: 0.17 });
+      const shadowFloor = new THREE.Mesh(shadowGeo, shadowMat);
+      shadowFloor.rotation.x = -Math.PI / 2;
+      shadowFloor.receiveShadow = true;
+      scene.add(shadowFloor);
+
+      const root = new THREE.Group();
+      scene.add(root);
+
+      const maxAniso = renderer.capabilities.getMaxAnisotropy();
+      const pbr = getSwatchPBR(product.primarySwatchId);
+      const texA = new THREE.CanvasTexture(pbr.albedoCanvas);
+      texA.encoding = THREE.sRGBEncoding;
+      texA.anisotropy = maxAniso;
+      const texN = new THREE.CanvasTexture(pbr.normalCanvas);
+      texN.anisotropy = maxAniso;
+      const texR = new THREE.CanvasTexture(pbr.roughCanvas);
+      texR.anisotropy = maxAniso;
+
+      const buildFallbackMesh = () => {
+        const clothMat = new THREE.MeshStandardMaterial({
+          map: texA,
+          normalMap: texN,
+          normalScale: new THREE.Vector2(1.2, 1.2),
+          roughnessMap: texR,
+          roughness: 0.92,
+          metalness: 0.04,
+          envMapIntensity: 0.35,
+          side: THREE.DoubleSide
+        });
+        const clothGeo = new THREE.PlaneGeometry(0.46, 0.56, 36, 40);
+        const p = clothGeo.attributes.position;
+        for (let i = 0; i < p.count; i++) {
+          const x = p.getX(i), y = p.getY(i);
+          p.setZ(i, Math.sin(x * 16.0) * 0.018 * (0.3 - y) + Math.cos(y * 9.0) * 0.006);
+        }
+        clothGeo.computeVertexNormals();
+        const cloth = new THREE.Mesh(clothGeo, clothMat);
+        cloth.position.y = 0.33;
+        cloth.castShadow = true;
+        cloth.receiveShadow = true;
+        root.add(cloth);
+        if (onStatus) onStatus('FALLBACK MESH ACTIVE · CHECK LOCAL SERVER FOR .GLB');
+      };
+
+      const glbPath = customGlbUrl || (KR_STUDIO_ASSETS.products[product.id] && KR_STUDIO_ASSETS.products[product.id].glb);
+      if (glbPath && THREE.GLTFLoader) {
+        if (onStatus) onStatus(`LOADING ${glbPath}...`);
+        const loader = new THREE.GLTFLoader();
+        loader.load(
+          glbPath,
+          (gltf) => {
+            const model = gltf.scene;
+            calibrateGlbMaterials(model, maxAniso);
+
+            // Auto-detect flat textile swatch (e.g. kantha_swatch_059.glb) and tilt toward camera for display
+            const rawBox = new THREE.Box3().setFromObject(model);
+            const rawSize = rawBox.getSize(new THREE.Vector3());
+            const isFlatSwatch = rawSize.y < Math.max(rawSize.x, rawSize.z) * 0.25;
+            if (isFlatSwatch) {
+              model.rotation.x = 0.72; // ~41 deg museum easel tilt
+            }
+
+            // Normalize scale & ground squarely on shadow floor (y = 0)
+            model.updateMatrixWorld(true);
+            const box = new THREE.Box3().setFromObject(model);
+            const size = box.getSize(new THREE.Vector3());
+            const maxDim = Math.max(size.x, size.y, size.z) || 1;
+            const normScale = 0.58 / maxDim;
+            model.scale.multiplyScalar(normScale);
+
+            model.updateMatrixWorld(true);
+            const box2 = new THREE.Box3().setFromObject(model);
+            const center = box2.getCenter(new THREE.Vector3());
+            model.position.x -= center.x;
+            model.position.z -= center.z;
+            model.position.y -= box2.min.y;
+            if (isFlatSwatch) model.position.y += 0.04;
+
+            root.add(model);
+
+            // Aim OrbitControls cleanly at vertical center of the loaded model
+            const finalBox = new THREE.Box3().setFromObject(model);
+            const finalCenter = finalBox.getCenter(new THREE.Vector3());
+            controls.target.set(0, finalCenter.y, 0);
+            camera.position.set(0.18, finalCenter.y + 0.16, isFlatSwatch ? 1.05 : 1.28);
+
+            if (onStatus) onStatus(`BLENDER .GLB LIVE (${glbPath.replace('./', '')}) · 3200K GALLERY RIG`);
+          },
+          undefined,
+          () => buildFallbackMesh()
+        );
+      } else {
+        buildFallbackMesh();
+      }
+
+      let autoSpin = false;
+      const onResize = () => {
+        const w = hostEl.clientWidth || 640;
+        const h = hostEl.clientHeight || 520;
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+        renderer.setSize(w, h);
+      };
+      window.addEventListener('resize', onResize);
+
+      const tick = () => {
+        if (autoSpin) root.rotation.y += 0.0045;
+        controls.update();
+        renderer.render(scene, camera);
+        WebGLMgr.rafId = requestAnimationFrame(tick);
+      };
+      tick();
+
+      WebGLMgr.cleanupFn = () => {
+        window.removeEventListener('resize', onResize);
+        controls.dispose();
+        galleryEnv.dispose();
+        shadowGeo.dispose(); shadowMat.dispose();
+        texA.dispose(); texN.dispose(); texR.dispose();
+        root.traverse((obj) => {
+          if (obj.isMesh) {
+            if (obj.geometry) obj.geometry.dispose();
+            const ms = Array.isArray(obj.material) ? obj.material : [obj.material];
+            ms.forEach(m => m && m.dispose());
+          }
+        });
+        renderer.dispose();
+        hostEl.innerHTML = '';
+      };
+
+      return {
+        toggleSpin() { autoSpin = !autoSpin; return autoSpin; },
+        setLightAngle(deg) {
+          const rad = (deg * Math.PI) / 180;
+          keyLight.position.set(Math.cos(rad) * 2.4, 2.2, Math.sin(rad) * 2.4);
+        },
+        reset() {
+          camera.position.set(0.18, 0.42, 1.28);
+          controls.target.set(0, 0.27, 0);
+          root.rotation.y = 0;
+        }
+      };
+    }
+
+    // 61 Orchard Street 3D Spatial Rack (Loads ./orchard_rack.glb + Soft Plaster Wall Shadows)
+    function mountOrchardRack3D(hostEl, selectedIndex, onSelectIndex) {
+      WebGLMgr.dispose();
+      hostEl.innerHTML = '';
+
+      if (typeof THREE === 'undefined') return null;
+
+      const width = hostEl.clientWidth || 720;
+      const height = hostEl.clientHeight || 480;
+      const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      renderer.setSize(width, height);
+      renderer.outputEncoding = THREE.sRGBEncoding;
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.04;
+      renderer.physicallyCorrectLights = true;
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      hostEl.appendChild(renderer.domElement);
+
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color('#ECEAE3');
+
+      const galleryEnv = createGalleryEnvMap(renderer);
+      scene.environment = galleryEnv.texture;
+
+      const camera = new THREE.PerspectiveCamera(34, width / height, 0.1, 40);
+      camera.position.set(0, 0.14, 2.55);
+
+      scene.add(new THREE.HemisphereLight('#FFFDF8', '#C6C0B4', 0.72));
+      const sun = new THREE.DirectionalLight('#FFEED6', 2.2);
+      sun.position.set(-2.2, 2.4, 2.8);
+      sun.castShadow = true;
+      sun.shadow.mapSize.set(1024, 1024);
+      sun.shadow.camera.left = -4;
+      sun.shadow.camera.right = 4;
+      sun.shadow.camera.top = 2.5;
+      sun.shadow.camera.bottom = -2.5;
+      sun.shadow.bias = -0.0005;
+      scene.add(sun);
+
+      const fill = new THREE.DirectionalLight('#E5EAEF', 0.65);
+      fill.position.set(2.5, 1.0, 2.0);
+      scene.add(fill);
+
+      // Dry limewash back wall receiving soft garment shadows
+      const wall = new THREE.Mesh(
+        new THREE.PlaneGeometry(16, 7),
+        new THREE.MeshStandardMaterial({ color: '#EAE6DC', roughness: 0.96, envMapIntensity: 0.25 })
+      );
+      wall.position.z = -0.52;
+      wall.receiveShadow = true;
+      scene.add(wall);
+
+      const railGroup = new THREE.Group();
+      scene.add(railGroup);
+
+      const timberMat = new THREE.MeshStandardMaterial({ color: '#8A6A4C', roughness: 0.86, envMapIntensity: 0.35 });
+      const ironMat = new THREE.MeshStandardMaterial({ color: '#201F1D', roughness: 0.45, metalness: 0.85, envMapIntensity: 1.0 });
+
+      // Fallback rail (hidden automatically once ./orchard_rack.glb loads)
+      const fallbackRail = new THREE.Group();
+      const bar = new THREE.Mesh(new THREE.CylinderGeometry(0.023, 0.023, 6.4, 20), timberMat);
+      bar.rotation.z = Math.PI / 2;
+      bar.position.set(1.95, 0.72, 0);
+      bar.castShadow = true;
+      fallbackRail.add(bar);
+      [-0.3, 4.2].forEach((x) => {
+        const rod = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 2.2, 10), ironMat);
+        rod.position.set(x, 1.82, 0);
+        fallbackRail.add(rod);
+      });
+      railGroup.add(fallbackRail);
+
+      // Load real Blender ./orchard_rack.glb and align bar height to y = 0.72
+      const maxAniso = renderer.capabilities.getMaxAnisotropy();
+      if (KR_STUDIO_ASSETS.rackGlb && THREE.GLTFLoader) {
+        new THREE.GLTFLoader().load(
+          KR_STUDIO_ASSETS.rackGlb,
+          (gltf) => {
+            const rackModel = gltf.scene;
+            calibrateGlbMaterials(rackModel, maxAniso);
+
+            // Hide Blender static hangers (replaced by our 6 interactive swaying garments) and widen timber bar
+            rackModel.traverse((n) => {
+              if (n.name && n.name.includes('WoodenHanger')) n.visible = false;
+              if (n.name && n.name.includes('TimberRail')) n.scale.y *= 2.45; // Cylinder length axis
+            });
+
+            // Align Blender Z=1.65m rail directly onto our Three.js Y=0.72m hang line, centered across 6 pieces
+            rackModel.position.set(1.95, 0.72 - 1.65, 0);
+            railGroup.add(rackModel);
+            fallbackRail.visible = false;
+          },
+          undefined,
+          () => { /* keep fallbackRail silently */ }
+        );
+      }
+
+      const spacing = 0.78;
+      const garmentMeshes = [];
+      const texturesToDispose = [];
+
+      RACK_PIECES.forEach((piece, idx) => {
+        const pbr = getSwatchPBR(piece.swatchId);
+        const tA = new THREE.CanvasTexture(pbr.albedoCanvas);
+        tA.encoding = THREE.sRGBEncoding;
+        tA.anisotropy = maxAniso;
+        const tN = new THREE.CanvasTexture(pbr.normalCanvas);
+        tN.anisotropy = maxAniso;
+        const tR = new THREE.CanvasTexture(pbr.roughCanvas);
+        texturesToDispose.push(tA, tN, tR);
+
+        const pivot = new THREE.Group();
+        pivot.position.set(idx * spacing, 0.70, 0);
+
+        const hBar = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.018, 0.018), timberMat);
+        hBar.position.y = -0.08;
+        hBar.castShadow = true;
+        pivot.add(hBar);
+
+        const hook = new THREE.Mesh(new THREE.TorusGeometry(0.025, 0.005, 8, 16, Math.PI * 1.3), ironMat);
+        hook.position.y = -0.02;
+        pivot.add(hook);
+
+        const gGeo = new THREE.BoxGeometry(0.46, 0.86, 0.055, 8, 12, 2);
+        const gp = gGeo.attributes.position;
+        for (let k = 0; k < gp.count; k++) {
+          const y = gp.getY(k), x = gp.getX(k);
+          gp.setZ(k, gp.getZ(k) + Math.sin(x * 11 + idx) * 0.012 * (0.45 - y));
+        }
+        gGeo.computeVertexNormals();
+
+        const gMat = new THREE.MeshStandardMaterial({
+          map: tA,
+          normalMap: tN,
+          normalScale: new THREE.Vector2(1.15, 1.15),
+          roughnessMap: tR,
+          roughness: 0.92,
+          metalness: 0.04,
+          envMapIntensity: 0.38
+        });
+        const gMesh = new THREE.Mesh(gGeo, gMat);
+        gMesh.position.y = -0.52;
+        gMesh.castShadow = true;
+        gMesh.receiveShadow = true;
+        gMesh.userData = { rackIndex: idx };
+        pivot.add(gMesh);
+
+        railGroup.add(pivot);
+        garmentMeshes.push({ pivot, gMesh, sway: 0, swayVel: 0 });
+      });
+
+      let currentIdx = selectedIndex;
+      let railX = -currentIdx * spacing;
+      let targetRailX = railX;
+      let dragging = false, startX = 0, startRailX = 0, dragDelta = 0;
+
+      const raycaster = new THREE.Raycaster();
+      const pointer = new THREE.Vector2();
+
+      const onDown = (e) => { dragging = true; startX = e.clientX; startRailX = targetRailX; dragDelta = 0; };
+      const onMove = (e) => {
+        if (!dragging) return;
+        const dx = e.clientX - startX;
+        dragDelta = Math.abs(dx);
+        const minX = -(RACK_PIECES.length - 1) * spacing;
+        targetRailX = Math.max(minX, Math.min(0, startRailX + dx * 0.0042));
+      };
+      const onUp = (e) => {
+        if (!dragging) return;
+        dragging = false;
+        if (dragDelta < 6) {
+          const rect = renderer.domElement.getBoundingClientRect();
+          pointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+          pointer.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+          raycaster.setFromCamera(pointer, camera);
+          const hits = raycaster.intersectObjects(garmentMeshes.map(m => m.gMesh));
+          if (hits.length) {
+            const hitIdx = hits[0].object.userData.rackIndex;
+            currentIdx = hitIdx;
+            targetRailX = -hitIdx * spacing;
+            garmentMeshes[hitIdx].swayVel += 0.04;
+            onSelectIndex(hitIdx);
+          }
+        } else {
+          const snapped = Math.max(0, Math.min(RACK_PIECES.length - 1, Math.round(-targetRailX / spacing)));
+          currentIdx = snapped;
+          targetRailX = -snapped * spacing;
+          onSelectIndex(snapped);
+        }
+      };
+
+      renderer.domElement.addEventListener('pointerdown', onDown);
+      window.addEventListener('pointermove', onMove);
+      window.addEventListener('pointerup', onUp);
+
+      const onResize = () => {
+        const w = hostEl.clientWidth || 720;
+        const h = hostEl.clientHeight || 480;
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+        renderer.setSize(w, h);
+      };
+      window.addEventListener('resize', onResize);
+
+      const tick = () => {
+        const prevX = railX;
+        railX += (targetRailX - railX) * 0.10;
+        const velX = railX - prevX;
+        railGroup.position.x = railX;
+
+        garmentMeshes.forEach((item, idx) => {
+          item.swayVel += (-velX * 0.9 - item.sway * 0.08);
+          item.swayVel *= 0.88;
+          item.sway += item.swayVel;
+          item.pivot.rotation.z = Math.max(-0.22, Math.min(0.22, item.sway));
+
+          const targetZ = idx === currentIdx ? 0.26 : 0.0;
+          const targetRotY = idx === currentIdx ? 0.16 : 0.0;
+          item.pivot.position.z += (targetZ - item.pivot.position.z) * 0.10;
+          item.pivot.rotation.y += (targetRotY - item.pivot.rotation.y) * 0.10;
+        });
+
+        renderer.render(scene, camera);
+        WebGLMgr.rafId = requestAnimationFrame(tick);
+      };
+      tick();
+
+      WebGLMgr.cleanupFn = () => {
+        renderer.domElement.removeEventListener('pointerdown', onDown);
+        window.removeEventListener('pointermove', onMove);
+        window.removeEventListener('pointerup', onUp);
+        window.removeEventListener('resize', onResize);
+        galleryEnv.dispose();
+        texturesToDispose.forEach(t => t.dispose());
+        renderer.dispose();
+        hostEl.innerHTML = '';
+      };
+
+      return {
+        focusIndex(i) {
+          currentIdx = i;
+          targetRailX = -i * spacing;
+          if (garmentMeshes[i]) garmentMeshes[i].swayVel += 0.03;
+        }
+      };
+    }
+
+    // 61 Orchard Street 3D Spatial Rack (One-of-a-Kind 1/1 pieces)
+    function mountOrchardRack3D(hostEl, selectedIndex, onSelectIndex) {
+      WebGLMgr.dispose();
+      hostEl.innerHTML = '';
+
+      if (typeof THREE === 'undefined') return null;
+
+      const width = hostEl.clientWidth || 720;
+      const height = hostEl.clientHeight || 480;
+      const renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      renderer.setSize(width, height);
+      hostEl.appendChild(renderer.domElement);
+
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color('#ECEAE3');
+
+      const camera = new THREE.PerspectiveCamera(34, width / height, 0.1, 40);
+      camera.position.set(0, 0.15, 2.55);
+
+      scene.add(new THREE.HemisphereLight('#FFFDF8', '#C6C0B4', 0.95));
+      const sun = new THREE.DirectionalLight('#FFF1DA', 1.15);
+      sun.position.set(-2.5, 2.6, 2.4);
+      scene.add(sun);
+
+      // Dry limewash back wall
+      const wall = new THREE.Mesh(
+        new THREE.PlaneGeometry(14, 6),
+        new THREE.MeshStandardMaterial({ color: '#EAE6DC', roughness: 0.96 })
+      );
+      wall.position.z = -0.7;
+      scene.add(wall);
+
+      // Raw timber rail & black iron suspension rods
+      const railGroup = new THREE.Group();
+      scene.add(railGroup);
+
+      const timberMat = new THREE.MeshStandardMaterial({ color: '#8F7153', roughness: 0.88 });
+      const ironMat = new THREE.MeshStandardMaterial({ color: '#262523', roughness: 0.65, metalness: 0.6 });
+      const bar = new THREE.Mesh(new THREE.CylinderGeometry(0.024, 0.024, 6.2, 16), timberMat);
+      bar.rotation.z = Math.PI / 2;
+      bar.position.y = 0.72;
+      railGroup.add(bar);
+
+      [-2.3, 2.3].forEach((x) => {
+        const rod = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 2.2, 8), ironMat);
+        rod.position.set(x, 1.82, 0);
+        railGroup.add(rod);
+      });
+
+      const spacing = 0.78;
+      const garmentMeshes = [];
+      const texturesToDispose = [];
+
+      RACK_PIECES.forEach((piece, idx) => {
+        const pbr = getSwatchPBR(piece.swatchId);
+        const tA = new THREE.CanvasTexture(pbr.albedoCanvas);
+        const tN = new THREE.CanvasTexture(pbr.normalCanvas);
+        texturesToDispose.push(tA, tN);
+
+        const pivot = new THREE.Group();
+        pivot.position.set(idx * spacing, 0.70, 0);
+
+        // Wooden hanger triangle
+        const hBar = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.018, 0.018), timberMat);
+        hBar.position.y = -0.08;
+        pivot.add(hBar);
+
+        const hook = new THREE.Mesh(new THREE.TorusGeometry(0.025, 0.005, 8, 16, Math.PI * 1.3), ironMat);
+        hook.position.y = -0.02;
+        pivot.add(hook);
+
+        // Draped singular garment body
+        const gGeo = new THREE.BoxGeometry(0.46, 0.86, 0.055, 8, 12, 2);
+        const gp = gGeo.attributes.position;
+        for (let k = 0; k < gp.count; k++) {
+          const y = gp.getY(k), x = gp.getX(k);
+          gp.setZ(k, gp.getZ(k) + Math.sin(x * 11 + idx) * 0.012 * (0.45 - y));
+        }
+        gGeo.computeVertexNormals();
+        const gMat = new THREE.MeshStandardMaterial({
+          map: tA,
+          normalMap: tN,
+          normalScale: new THREE.Vector2(1.0, 1.0),
+          roughness: 0.90,
+          metalness: 0.08
+        });
+        const gMesh = new THREE.Mesh(gGeo, gMat);
+        gMesh.position.y = -0.52;
+        gMesh.userData = { rackIndex: idx };
+        pivot.add(gMesh);
+
+        railGroup.add(pivot);
+        garmentMeshes.push({ pivot, gMesh, sway: 0, swayVel: 0 });
+      });
+
+      let currentIdx = selectedIndex;
+      let railX = -currentIdx * spacing;
+      let targetRailX = railX;
+      let dragging = false, startX = 0, startRailX = 0, dragDelta = 0;
+
+      const raycaster = new THREE.Raycaster();
+      const pointer = new THREE.Vector2();
+
+      const onDown = (e) => {
+        dragging = true;
+        startX = e.clientX;
+        startRailX = targetRailX;
+        dragDelta = 0;
+      };
+      const onMove = (e) => {
+        if (!dragging) return;
+        const dx = e.clientX - startX;
+        dragDelta = Math.abs(dx);
+        const minX = -(RACK_PIECES.length - 1) * spacing;
+        targetRailX = Math.max(minX, Math.min(0, startRailX + dx * 0.0042));
+      };
+      const onUp = (e) => {
+        if (!dragging) return;
+        dragging = false;
+        if (dragDelta < 6) {
+          // Click to select garment
+          const rect = renderer.domElement.getBoundingClientRect();
+          pointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+          pointer.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+          raycaster.setFromCamera(pointer, camera);
+          const hits = raycaster.intersectObjects(garmentMeshes.map(m => m.gMesh));
+          if (hits.length) {
+            const hitIdx = hits[0].object.userData.rackIndex;
+            currentIdx = hitIdx;
+            targetRailX = -hitIdx * spacing;
+            garmentMeshes[hitIdx].swayVel += 0.04;
+            onSelectIndex(hitIdx);
+          }
+        } else {
+          // Snap to nearest piece
+          const snapped = Math.max(0, Math.min(RACK_PIECES.length - 1, Math.round(-targetRailX / spacing)));
+          currentIdx = snapped;
+          targetRailX = -snapped * spacing;
+          onSelectIndex(snapped);
+        }
+      };
+
+      renderer.domElement.addEventListener('pointerdown', onDown);
+      window.addEventListener('pointermove', onMove);
+      window.addEventListener('pointerup', onUp);
+
+      const onResize = () => {
+        const w = hostEl.clientWidth || 720;
+        const h = hostEl.clientHeight || 480;
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+        renderer.setSize(w, h);
+      };
+      window.addEventListener('resize', onResize);
+
+      const tick = () => {
+        const prevX = railX;
+        railX += (targetRailX - railX) * 0.10;
+        const velX = railX - prevX;
+        railGroup.position.x = railX;
+
+        garmentMeshes.forEach((item, idx) => {
+          // Spring sway driven by rail momentum
+          item.swayVel += (-velX * 0.9 - item.sway * 0.08);
+          item.swayVel *= 0.88;
+          item.sway += item.swayVel;
+          item.pivot.rotation.z = Math.max(-0.22, Math.min(0.22, item.sway));
+
+          // Focused piece steps forward slightly for inspection
+          const targetZ = idx === currentIdx ? 0.26 : 0.0;
+          const targetRotY = idx === currentIdx ? 0.16 : 0.0;
+          item.pivot.position.z += (targetZ - item.pivot.position.z) * 0.10;
+          item.pivot.rotation.y += (targetRotY - item.pivot.rotation.y) * 0.10;
+        });
+
+        renderer.render(scene, camera);
+        WebGLMgr.rafId = requestAnimationFrame(tick);
+      };
+      tick();
+
+      WebGLMgr.cleanupFn = () => {
+        renderer.domElement.removeEventListener('pointerdown', onDown);
+        window.removeEventListener('pointermove', onMove);
+        window.removeEventListener('pointerup', onUp);
+        window.removeEventListener('resize', onResize);
+        texturesToDispose.forEach(t => t.dispose());
+        renderer.dispose();
+        hostEl.innerHTML = '';
+      };
+
+      return {
+        focusIndex(i) {
+          currentIdx = i;
+          targetRailX = -i * spacing;
+          if (garmentMeshes[i]) garmentMeshes[i].swayVel += 0.03;
+        }
+      };
+    }
+
+    /* =========================================================================
+       4. OPTIONAL WORKSHOP LOOM SOUND (WEB AUDIO API — MUTED BY DEFAULT)
+    ========================================================================= */
+    const WorkshopAudio = {
+      ctx: null,
+      gain: null,
+      timer: null,
+      active: false,
+      toggle() {
+        if (this.active) { this.stop(); return false; }
+        this.start();
+        return true;
+      },
+      start() {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) return;
+        if (!this.ctx) this.ctx = new AC();
+        if (this.ctx.state === 'suspended') this.ctx.resume();
+
+        this.gain = this.ctx.createGain();
+        this.gain.gain.setValueAtTime(0.001, this.ctx.currentTime);
+        this.gain.gain.linearRampToValueAtTime(0.16, this.ctx.currentTime + 0.6);
+        this.gain.connect(this.ctx.destination);
+
+        // Subtle warm studio room noise + soft wooden handloom shuttle clack
+        const pulseLoom = () => {
+          if (!this.active || !this.ctx) return;
+          const now = this.ctx.currentTime;
+          // Soft wooden beater thump (low-pass filtered noise burst)
+          const bufLen = Math.floor(this.ctx.sampleRate * 0.065);
+          const buf = this.ctx.createBuffer(1, bufLen, this.ctx.sampleRate);
+          const data = buf.getChannelData(0);
+          for (let i = 0; i < bufLen; i++) {
+            data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufLen * 0.22));
+          }
+          const src = this.ctx.createBufferSource();
+          src.buffer = buf;
+
+          const filter = this.ctx.createBiquadFilter();
+          filter.type = 'bandpass';
+          filter.frequency.value = 320 + Math.random() * 110;
+          filter.Q.value = 2.4;
+
+          src.connect(filter);
+          filter.connect(this.gain);
+          src.start(now);
+        };
+
+        this.active = true;
+        pulseLoom();
+        this.timer = setInterval(pulseLoom, 920);
+      },
+      stop() {
+        this.active = false;
+        if (this.timer) { clearInterval(this.timer); this.timer = null; }
+        if (this.gain && this.ctx) {
+          this.gain.gain.linearRampToValueAtTime(0.0001, this.ctx.currentTime + 0.25);
+        }
+      }
+    };
+
+    /* =========================================================================
+       5. APPLICATION STATE & RENDERING
+    ========================================================================= */
+    const STATE = {
+      view: 'pdp',
+      currency: 'USD',
+      plainMode: window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+      productId: PRODUCTS[0].id,
+      pdpMode: 'photo', // 'photo' | 'light' | '3d'
+      selectedSize: PRODUCTS[0].sizes[0].label,
+      swatchId: SWATCHES[0].id,
+      libLightActive: false,
+      libMacro: false,
+      rackIndex: 0,
+      mapRegion: 'Gujarat',
+      bag: [],
+      customGlbUrls: {},
+      lightCtrl: null,
+      turntableCtrl: null,
+      rackCtrl: null
+    };
+
+    function formatPrice(usd) {
+      const c = CURRENCIES[STATE.currency];
+      const val = Math.round(usd * c.rate);
+      return `${c.symbol}${val.toLocaleString('en-US')} ${STATE.currency}`;
+    }
+
+    function setView(viewName) {
+      WebGLMgr.dispose();
+      STATE.lightCtrl = null;
+      STATE.turntableCtrl = null;
+      STATE.rackCtrl = null;
+      STATE.view = viewName;
+
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.view === viewName));
+      document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === 'view-' + viewName));
+
+      if (viewName === 'pdp') {
+        STATE.pdpMode = 'photo'; // Always honor photo-first on view entry
+        renderPDP();
+      } else if (viewName === 'library') {
+        STATE.libLightActive = false;
+        renderLibrary();
+      } else if (viewName === 'rack') {
+        renderRack();
+      } else if (viewName === 'map') {
+        renderMap();
+      } else if (viewName === 'archive') {
+        renderArchive();
+      }
+    }
+
+    /* ---------------- PDP RENDER ---------------- */
+    function renderPDP() {
+      const product = PRODUCTS.find(p => p.id === STATE.productId) || PRODUCTS[0];
+
+      // Switcher bar
+      const swBar = document.getElementById('pdpSwitcher');
+      swBar.innerHTML = PRODUCTS.map(p =>
+        `<button class="pdp-switch-btn ${p.id === product.id ? 'active' : ''}" data-pid="${p.id}">${p.title}</button>`
+      ).join('');
+      swBar.querySelectorAll('button').forEach(b => {
+        b.onclick = () => {
+          STATE.productId = b.dataset.pid;
+          const next = PRODUCTS.find(x => x.id === STATE.productId);
+          STATE.selectedSize = next.sizes[0].label;
+          STATE.pdpMode = 'photo';
+          renderPDP();
+        };
+      });
+
+      document.getElementById('pdpSeasonCode').textContent = product.season;
+      document.getElementById('pdpTitle').textContent = product.title;
+      document.getElementById('pdpPrice').textContent = formatPrice(product.priceUSD);
+      document.getElementById('pdpDesc').textContent = product.desc;
+
+      // Mode tabs (respect Plain Mode)
+      document.querySelectorAll('[data-pdp-mode]').forEach(btn => {
+        const m = btn.dataset.pdpMode;
+        btn.disabled = STATE.plainMode && m !== 'photo';
+        btn.classList.toggle('active', STATE.pdpMode === m);
+      });
+
+      // Stage content
+      const photoEl = document.getElementById('pdpPhotoImg');
+      const lightHost = document.getElementById('pdpLightHost');
+      const d3Host = document.getElementById('pdp3dHost');
+      const subCtrl = document.getElementById('pdpSubControls');
+      const hint = document.getElementById('pdpStageHint');
+      const tele = document.getElementById('pdpTelemetry');
+
+      photoEl.style.display = 'none';
+      lightHost.classList.remove('active');
+      d3Host.classList.remove('active');
+      subCtrl.innerHTML = '';
+      WebGLMgr.dispose();
+
+      if (STATE.pdpMode === 'photo' || STATE.plainMode) {
+        photoEl.src = getProductStudioPhoto(product);
+        photoEl.alt = product.title;
+        photoEl.style.display = 'block';
+        hint.textContent = STATE.plainMode
+          ? 'Plain Mode active — static high-res photography only.'
+          : 'Static photograph loaded first. Click "Cloth in Light" or "Load 3D Model" to inspect handwork.';
+        tele.textContent = 'PAYLOAD: 2D STUDIO PLATE';
+      } else if (STATE.pdpMode === 'light') {
+        lightHost.classList.add('active');
+        let macroOn = false;
+        const pbr = getSwatchPBR(product.primarySwatchId);
+        STATE.lightCtrl = mountRakingLightViewer(lightHost, pbr, {
+          zoom: 1.0,
+          onTelemetry: (txt) => { tele.textContent = txt; }
+        });
+        hint.textContent = `Raking 3200K lamp over Swatch ${product.primarySwatchId}. Move cursor or drag to reveal stitch depth.`;
+        subCtrl.innerHTML = `<button class="inline-ctrl" id="pdpMacroBtn">Macro 2.4×: Off</button>`;
+        document.getElementById('pdpMacroBtn').onclick = (e) => {
+          macroOn = !macroOn;
+          e.target.textContent = `Macro 2.4×: ${macroOn ? 'On' : 'Off'}`;
+          if (STATE.lightCtrl) STATE.lightCtrl.setZoom(macroOn ? 2.4 : 1.0);
+        };
+      } else if (STATE.pdpMode === '3d') {
+        d3Host.classList.add('active');
+        STATE.turntableCtrl = mount3DProductTurntable(
+          d3Host,
+          product,
+          STATE.customGlbUrls[product.id] || '',
+          (status) => { tele.textContent = status; }
+        );
+        hint.textContent = 'Drag to orbit 360° · Scroll to zoom · Drop your Blender .glb via Studio Assets.';
+        subCtrl.innerHTML = `
+          <label class="mono-label" style="display:flex;align-items:center;gap:6px;">
+            Lamp <input type="range" id="pdpLampSlider" min="-180" max="180" value="48" style="width:78px;" />
+          </label>
+          <button class="inline-ctrl" id="pdpSpinBtn">Auto-Spin: Off</button>
+          <button class="inline-ctrl" id="pdpResetCam">Reset</button>
+        `;
+        document.getElementById('pdpLampSlider').oninput = (e) => {
+          STATE.turntableCtrl && STATE.turntableCtrl.setLightAngle(parseFloat(e.target.value));
+        };
+        document.getElementById('pdpSpinBtn').onclick = (e) => {
+          if (!STATE.turntableCtrl) return;
+          const on = STATE.turntableCtrl.toggleSpin();
+          e.target.textContent = `Auto-Spin: ${on ? 'On' : 'Off'}`;
+        };
+        document.getElementById('pdpResetCam').onclick = () => STATE.turntableCtrl && STATE.turntableCtrl.reset();
+      }
+
+      // Sizes + Waitlist / Made-to-Order logic
+      const sizeGrid = document.getElementById('pdpSizes');
+      sizeGrid.innerHTML = product.sizes.map(s => `
+        <button class="size-btn ${s.inStock ? '' : 'sold-out'} ${STATE.selectedSize === s.label ? 'selected' : ''}" data-size="${s.label}">
+          ${s.label}
+        </button>
+      `).join('');
+
+      const activeSizeObj = product.sizes.find(s => s.label === STATE.selectedSize) || product.sizes[0];
+      const addBtn = document.getElementById('pdpAddBtn');
+      const wlBox = document.getElementById('waitlistBox');
+      const wlFeedback = document.getElementById('waitlistFeedback');
+
+      if (activeSizeObj.inStock) {
+        addBtn.style.display = 'block';
+        addBtn.textContent = `Add Size ${activeSizeObj.label} to Bag — ${formatPrice(product.priceUSD)}`;
+        wlBox.classList.remove('open');
+      } else {
+        addBtn.style.display = 'none';
+        wlBox.classList.add('open');
+        document.getElementById('waitlistTitle').textContent = `Size ${activeSizeObj.label} Sold Out — Request Next Artisan Batch`;
+        wlFeedback.textContent = '';
+      }
+
+      sizeGrid.querySelectorAll('button').forEach(b => {
+        b.onclick = () => {
+          STATE.selectedSize = b.dataset.size;
+          renderPDP();
+        };
+      });
+
+      // Linked craft swatches
+      const swWrap = document.getElementById('pdpLinkedSwatches');
+      swWrap.innerHTML = product.swatchIds.map(sid => {
+        const sw = SWATCHES.find(x => x.id === sid);
+        const pbr = getSwatchPBR(sid);
+        return `
+          <button class="linked-swatch-card" data-jump-swatch="${sid}">
+            <img class="linked-swatch-thumb" src="${pbr.dataUrl}" alt="${sw.name}" />
+            <div>
+              <div class="mono-label">${sw.code} · ${sw.region}</div>
+              <div style="font-weight:500; font-size:12px;">${sw.name}</div>
+            </div>
+            <span class="mono-label">Inspect &rarr;</span>
+          </button>
+        `;
+      }).join('');
+
+      swWrap.querySelectorAll('[data-jump-swatch]').forEach(b => {
+        b.onclick = () => {
+          STATE.swatchId = b.dataset.jumpSwatch;
+          setView('library');
+        };
+      });
+
+      // Provenance specs
+      document.getElementById('pdpSpecTable').innerHTML = product.specs
+        .map(([k, v]) => `<tr><td>${k}</td><td>${v}</td></tr>`).join('');
+    }
+
+    /* ---------------- TEXTILE LIBRARY RENDER ---------------- */
+    function initLibraryFilters() {
+      const techs = [...new Set(SWATCHES.map(s => s.technique))].sort();
+      const regs  = [...new Set(SWATCHES.map(s => s.region))].sort();
+      const cols  = [...new Set(SWATCHES.map(s => s.colorFamily))].sort();
+
+      const fill = (id, label, list) => {
+        const el = document.getElementById(id);
+        el.innerHTML = `<option value="">${label}</option>` + list.map(v => `<option value="${v}">${v}</option>`).join('');
+      };
+      fill('libTechniqueFilter', 'All Techniques', techs);
+      fill('libRegionFilter', 'All Regions', regs);
+      fill('libColorFilter', 'All Color Families', cols);
+    }
+
+    function renderLibrary() {
+      const q = document.getElementById('libSearch').value.trim().toLowerCase();
+      const t = document.getElementById('libTechniqueFilter').value;
+      const r = document.getElementById('libRegionFilter').value;
+      const c = document.getElementById('libColorFilter').value;
+
+      const filtered = SWATCHES.filter(sw => {
+        if (t && sw.technique !== t) return false;
+        if (r && sw.region !== r) return false;
+        if (c && sw.colorFamily !== c) return false;
+        if (q && !(sw.code + ' ' + sw.name + ' ' + sw.technique + ' ' + sw.region).toLowerCase().includes(q)) return false;
+        return true;
+      });
+
+      const grid = document.getElementById('swatchGrid');
+      if (!filtered.length) {
+        grid.innerHTML = '<div style="padding:24px;" class="mono-label">No swatches match these filters.</div>';
+      } else {
+        grid.innerHTML = filtered.map(sw => {
+          const pbr = getSwatchPBR(sw.id);
+          return `
+            <button class="swatch-card ${sw.id === STATE.swatchId ? 'active' : ''}" data-sid="${sw.id}">
+              <img class="swatch-img" src="${pbr.dataUrl}" alt="${sw.name}" />
+              <div class="mono-label">${sw.code}</div>
+              <div style="font-size:12px; font-weight:500;">${sw.name}</div>
+              <div class="mono-label">${sw.region} · ${sw.technique}</div>
+            </button>
+          `;
+        }).join('');
+      }
+
+      grid.querySelectorAll('[data-sid]').forEach(b => {
+        b.onclick = () => {
+          STATE.swatchId = b.dataset.sid;
+          renderLibrary();
+        };
+      });
+
+      // Right-hand inspector
+      const sw = SWATCHES.find(s => s.id === STATE.swatchId) || SWATCHES[0];
+      const pbr = getSwatchPBR(sw.id);
+
+      document.getElementById('libCode').textContent = `${sw.code} · ${sw.region.toUpperCase()} · ${sw.technique.toUpperCase()}`;
+      document.getElementById('libName').textContent = sw.name;
+      document.getElementById('libNotes').textContent = sw.notes;
+
+      document.getElementById('libSpecTable').innerHTML = [
+        ['Region', sw.region],
+        ['Technique', sw.technique],
+        ['Color Family', sw.colorFamily],
+        ['Handwork Time', sw.hours],
+        ['Specular Spec', sw.metallic > 0.5 ? 'High metallic/glass contrast (ideal for raking light)' : 'Matte handspun relief']
+      ].map(([k, v]) => `<tr><td>${k}</td><td>${v}</td></tr>`).join('');
+
+      // Pairings
+      const pairWrap = document.getElementById('libPairings');
+      pairWrap.innerHTML = sw.pairsWith.map(pid => {
+        const ps = SWATCHES.find(x => x.id === pid);
+        return ps ? `<button class="chip-btn" data-pair="${ps.id}">${ps.code} ${ps.technique}</button>` : '';
+      }).join('');
+      pairWrap.querySelectorAll('[data-pair]').forEach(b => {
+        b.onclick = () => { STATE.swatchId = b.dataset.pair; renderLibrary(); };
+      });
+
+      // Linked garments
+      const linkedProds = PRODUCTS.filter(p => p.swatchIds.includes(sw.id));
+      const lpWrap = document.getElementById('libLinkedProducts');
+      lpWrap.innerHTML = linkedProds.length
+        ? linkedProds.map(p => `<button class="chip-btn" data-jump-prod="${p.id}">${p.title} &rarr;</button>`).join('')
+        : '<span class="mono-label">Archive Textile · Available for Custom Batch Inquiry</span>';
+      lpWrap.querySelectorAll('[data-jump-prod]').forEach(b => {
+        b.onclick = () => {
+          STATE.productId = b.dataset.jumpProd;
+          setView('pdp');
+        };
+      });
+
+      // Photo-first vs Light-reactive WebGL toggle
+      const fallbackImg = document.getElementById('libPhotoFallback');
+      const lightHost = document.getElementById('libLightHost');
+      const lightBtn = document.getElementById('libLightToggle');
+      const zoomBtn = document.getElementById('libZoomToggle');
+      const hint = document.getElementById('libStageHint');
+
+      fallbackImg.src = pbr.dataUrl;
+      WebGLMgr.dispose();
+
+      if (STATE.libLightActive && !STATE.plainMode) {
+        fallbackImg.style.display = 'none';
+        lightHost.classList.add('active');
+        lightBtn.textContent = 'Back to Photo';
+        zoomBtn.style.display = 'inline';
+        zoomBtn.textContent = `Macro 2.4×: ${STATE.libMacro ? 'On' : 'Off'}`;
+        STATE.lightCtrl = mountRakingLightViewer(lightHost, pbr, {
+          zoom: STATE.libMacro ? 2.4 : 1.0,
+          onTelemetry: (txt) => { hint.textContent = txt; }
+        });
+      } else {
+        fallbackImg.style.display = 'block';
+        lightHost.classList.remove('active');
+        lightBtn.textContent = STATE.plainMode ? 'Light Scan Disabled (Plain Mode)' : 'Enable Light Scan (WebGL)';
+        zoomBtn.style.display = 'none';
+        hint.textContent = 'Photo loaded first. Click "Enable Light Scan" to move 3200K light across the weave.';
+      }
+    }
+
+    /* ---------------- 61 ORCHARD ST RACK RENDER ---------------- */
+    function renderRack() {
+      const host = document.getElementById('rackCanvasHost');
+      const plainStrip = document.getElementById('rackPlainStrip');
+      const idxBtns = document.getElementById('rackIndexBtns');
+
+      idxBtns.innerHTML = RACK_PIECES.map((p, i) =>
+        `<button class="rack-idx ${i === STATE.rackIndex ? 'active' : ''}" data-ridx="${i}">${p.index}</button>`
+      ).join('');
+
+      const updateSidebar = () => {
+        const piece = RACK_PIECES[STATE.rackIndex];
+        const sw = SWATCHES.find(s => s.id === piece.swatchId);
+        document.getElementById('rackEditionTag').textContent = `EDITION ${piece.index} / 01 · SINGULAR PIECE`;
+        document.getElementById('rackTitle').textContent = piece.title;
+        document.getElementById('rackPrice').textContent = formatPrice(piece.priceUSD);
+        document.getElementById('rackDesc').textContent = piece.note;
+        document.getElementById('rackSpecTable').innerHTML = [
+          ['Size', piece.size],
+          ['Physical Location', piece.location],
+          ['Primary Craft', `${sw.code} ${sw.name}`],
+          ['Availability', '1 of 1 — removes from rail once claimed']
+        ].map(([k, v]) => `<tr><td>${k}</td><td>${v}</td></tr>`).join('');
+
+        idxBtns.querySelectorAll('.rack-idx').forEach((b, i) => b.classList.toggle('active', i === STATE.rackIndex));
+      };
+
+      if (STATE.plainMode) {
+        WebGLMgr.dispose();
+        host.style.display = 'none';
+        plainStrip.style.display = 'grid';
+        plainStrip.innerHTML = RACK_PIECES.map((p, i) => {
+          const pbr = getSwatchPBR(p.swatchId);
+          return `
+            <button class="swatch-card ${i === STATE.rackIndex ? 'active' : ''}" data-plain-ridx="${i}">
+              <img class="swatch-img" src="${pbr.dataUrl}" alt="${p.title}" />
+              <div class="mono-label">${p.index} / 1-OF-1</div>
+              <div style="font-size:12px; font-weight:500;">${p.title}</div>
+              <div class="mono-label">${formatPrice(p.priceUSD)}</div>
+            </button>
+          `;
+        }).join('');
+        plainStrip.querySelectorAll('[data-plain-ridx]').forEach(b => {
+          b.onclick = () => { STATE.rackIndex = parseInt(b.dataset.plainRidx, 10); renderRack(); };
+        });
+      } else {
+        plainStrip.style.display = 'none';
+        host.style.display = 'block';
+        STATE.rackCtrl = mountOrchardRack3D(host, STATE.rackIndex, (newIdx) => {
+          STATE.rackIndex = newIdx;
+          updateSidebar();
+        });
+      }
+
+      idxBtns.querySelectorAll('.rack-idx').forEach(b => {
+        b.onclick = () => {
+          STATE.rackIndex = parseInt(b.dataset.ridx, 10);
+          updateSidebar();
+          if (STATE.rackCtrl) STATE.rackCtrl.focusIndex(STATE.rackIndex);
+          if (STATE.plainMode) renderRack();
+        };
+      });
+
+      updateSidebar();
+    }
+
+    /* ---------------- 11-STATE INDIA CRAFT MAP ---------------- */
+    function renderMap() {
+      const layer = document.getElementById('mapPinsLayer');
+      layer.innerHTML = INDIA_REGIONS.map(reg => {
+        const isAct = reg.name === STATE.mapRegion;
+        return `
+          <g class="state-pin ${isAct ? 'active' : ''}" data-region="${reg.name}" transform="translate(${reg.x},${reg.y})">
+            <circle class="dot" r="${isAct ? 6.5 : 4.5}" />
+            <text x="9" y="3">${reg.name}</text>
+          </g>
+        `;
+      }).join('');
+
+      layer.querySelectorAll('[data-region]').forEach(g => {
+        g.onclick = () => { STATE.mapRegion = g.dataset.region; renderMap(); };
+      });
+
+      const reg = INDIA_REGIONS.find(r => r.name === STATE.mapRegion) || INDIA_REGIONS[0];
+      const regSwatches = SWATCHES.filter(s => s.region === reg.name);
+      const panel = document.getElementById('mapPanel');
+
+      panel.innerHTML = `
+        <div>
+          <span class="mono-label">Partner Region · India Craft Atlas</span>
+          <h2 style="margin:6px 0 8px; font-size:20px; font-weight:500; text-transform:uppercase; letter-spacing:0.04em;">${reg.name}</h2>
+          <p class="pdp-desc">${reg.note}</p>
+        </div>
+
+        <table class="spec-table">
+          <tr><td>Primary Crafts</td><td>${reg.crafts.join(', ')}</td></tr>
+          <tr><td>Seasons Featured</td><td>${reg.seasons.join(' · ')}</td></tr>
+          <tr><td>Pilot Light Scans</td><td>${regSwatches.length} scanned in Phase 1</td></tr>
+        </table>
+
+        <div class="spec-section">
+          <span class="mono-label">Scanned Swatches from ${reg.name}</span>
+          <div class="linked-swatches">
+            ${regSwatches.length ? regSwatches.map(sw => `
+              <button class="linked-swatch-card" data-map-swatch="${sw.id}">
+                <img class="linked-swatch-thumb" src="${getSwatchPBR(sw.id).dataUrl}" alt="${sw.name}" />
+                <div>
+                  <div class="mono-label">${sw.code}</div>
+                  <div style="font-size:12px; font-weight:500;">${sw.name}</div>
+                </div>
+                <span class="mono-label">Light Scan &rarr;</span>
+              </button>
+            `).join('') : '<span class="mono-label" style="margin-top:6px;">Scheduled for Phase 2 scanning batch (of 137 archive swatches).</span>'}
+          </div>
+        </div>
+      `;
+
+      panel.querySelectorAll('[data-map-swatch]').forEach(b => {
+        b.onclick = () => {
+          STATE.swatchId = b.dataset.mapSwatch;
+          STATE.libLightActive = !STATE.plainMode;
+          setView('library');
+        };
+      });
+    }
+
+    /* ---------------- ARCHIVE ---------------- */
+    function renderArchive() {
+      document.getElementById('archiveGrid').innerHTML = ARCHIVE_SEASONS.map(s => `
+        <article class="archive-item">
+          <span class="mono-label">${s.code} &middot; ${s.date}</span>
+          <h3 style="margin:0; font-size:15px; font-weight:500; text-transform:uppercase; letter-spacing:0.04em;">${s.title}</h3>
+          <p style="margin:0; font-size:12.5px; color:#2B2A27; line-height:1.55;">${s.summary}</p>
+        </article>
+      `).join('');
+    }
+
+    /* ---------------- SHOPPING BAG ---------------- */
+    function addToBag(item) {
+      const existing = STATE.bag.find(x => x.key === item.key);
+      if (existing) {
+        if (!item.singular) existing.qty += 1;
+      } else {
+        STATE.bag.push(Object.assign({ qty: 1 }, item));
+      }
+      renderBag();
+      openDrawer('bagDrawer');
+    }
+
+    function renderBag() {
+      const totalQty = STATE.bag.reduce((sum, i) => sum + i.qty, 0);
+      document.getElementById('bagCount').textContent = totalQty;
+
+      const wrap = document.getElementById('bagItems');
+      if (!STATE.bag.length) {
+        wrap.innerHTML = '<div class="mono-label" style="padding:12px 0;">Your bag is empty.</div>';
+      } else {
+        wrap.innerHTML = STATE.bag.map((item, idx) => `
+          <div class="bag-item">
+            <img class="bag-thumb" src="${item.thumb}" alt="${item.title}" />
+            <div>
+              <div style="font-size:12px; font-weight:500; text-transform:uppercase;">${item.title}</div>
+              <div class="mono-label" style="margin-top:2px;">Size: ${item.size} ${item.singular ? '· 1/1 Edition' : ''}</div>
+              <div class="mono-label" style="margin-top:4px; color:var(--ink);">${formatPrice(item.priceUSD * item.qty)}</div>
+              <div class="qty-row">
+                ${item.singular ? '' : `<button class="qty-btn" data-qty-dec="${idx}">-</button><span class="mono-label">${item.qty}</span><button class="qty-btn" data-qty-inc="${idx}">+</button>`}
+                <button class="inline-ctrl" style="margin-left:auto;" data-bag-rm="${idx}">Remove</button>
+              </div>
+            </div>
+          </div>
+        `).join('');
+
+        wrap.querySelectorAll('[data-qty-dec]').forEach(b => b.onclick = () => {
+          const i = parseInt(b.dataset.qtyDec, 10);
+          if (STATE.bag[i].qty > 1) STATE.bag[i].qty--; else STATE.bag.splice(i, 1);
+          renderBag();
+        });
+        wrap.querySelectorAll('[data-qty-inc]').forEach(b => b.onclick = () => {
+          STATE.bag[parseInt(b.dataset.qtyInc, 10)].qty++;
+          renderBag();
+        });
+        wrap.querySelectorAll('[data-bag-rm]').forEach(b => b.onclick = () => {
+          STATE.bag.splice(parseInt(b.dataset.bagRm, 10), 1);
+          renderBag();
+        });
+      }
+
+      const subUSD = STATE.bag.reduce((sum, i) => sum + i.priceUSD * i.qty, 0);
+      document.getElementById('bagSubtotal').textContent = formatPrice(subUSD);
+    }
+
+    /* ---------------- DRAWER HELPERS ---------------- */
+    function openDrawer(id) {
+      document.querySelectorAll('.drawer').forEach(d => d.classList.remove('open'));
+      document.getElementById(id).classList.add('open');
+      document.getElementById('drawerBackdrop').classList.add('open');
+      if (id === 'assetDrawer') {
+        const p = PRODUCTS.find(x => x.id === STATE.productId);
+        const s = SWATCHES.find(x => x.id === STATE.swatchId);
+        document.getElementById('assetTargetProduct').textContent = p.title;
+        document.getElementById('assetTargetSwatch').textContent = `${s.code} ${s.name}`;
+      }
+    }
+    function closeDrawers() {
+      document.querySelectorAll('.drawer').forEach(d => d.classList.remove('open'));
+      document.getElementById('drawerBackdrop').classList.remove('open');
+    }
+
+    /* =========================================================================
+       6. EVENT WIRING
+    ========================================================================= */
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+      btn.onclick = () => setView(btn.dataset.view);
+    });
+
+    document.querySelectorAll('[data-pdp-mode]').forEach(btn => {
+      btn.onclick = () => {
+        if (btn.disabled) return;
+        STATE.pdpMode = btn.dataset.pdpMode;
+        renderPDP();
+      };
+    });
+
+    document.getElementById('pdpAddBtn').onclick = () => {
+      const p = PRODUCTS.find(x => x.id === STATE.productId);
+      addToBag({
+        key: `${p.id}-${STATE.selectedSize}`,
+        title: p.title,
+        size: STATE.selectedSize,
+        priceUSD: p.priceUSD,
+        thumb: getProductStudioPhoto(p),
+        singular: false
+      });
+    };
+
+    document.getElementById('waitlistForm').onsubmit = (e) => {
+      e.preventDefault();
+      const email = document.getElementById('waitlistEmail').value.trim();
+      const p = PRODUCTS.find(x => x.id === STATE.productId);
+      try {
+        const saved = JSON.parse(localStorage.getItem('kr_waitlist') || '[]');
+        saved.push({ product: p.title, size: STATE.selectedSize, email, at: new Date().toISOString() });
+        localStorage.setItem('kr_waitlist', JSON.stringify(saved));
+      } catch (_) {}
+      document.getElementById('waitlistFeedback').textContent =
+        `Recorded: ${email} queued for ${p.title} (Size ${STATE.selectedSize}).`;
+      document.getElementById('waitlistEmail').value = '';
+    };
+
+    document.getElementById('openFullLibFromPdp').onclick = () => setView('library');
+
+    document.getElementById('rackClaimBtn').onclick = () => {
+      const piece = RACK_PIECES[STATE.rackIndex];
+      addToBag({
+        key: piece.id,
+        title: piece.title,
+        size: piece.size,
+        priceUSD: piece.priceUSD,
+        thumb: getSwatchPBR(piece.swatchId).dataUrl,
+        singular: true
+      });
+    };
+
+    // Currency switcher
+    document.getElementById('currencySelect').onchange = (e) => {
+      STATE.currency = e.target.value;
+      renderBag();
+      if (STATE.view === 'pdp') renderPDP();
+      if (STATE.view === 'rack') renderRack();
+    };
+
+    // Plain Mode toggle (immediately frees GPU & audio)
+    const syncPlainUI = () => {
+      document.body.classList.toggle('plain-mode', STATE.plainMode);
+      const b = document.getElementById('plainModeBtn');
+      b.classList.toggle('is-on', STATE.plainMode);
+      b.setAttribute('aria-pressed', String(STATE.plainMode));
+      b.textContent = `Plain: ${STATE.plainMode ? 'On' : 'Off'}`;
+    };
+    document.getElementById('plainModeBtn').onclick = () => {
+      STATE.plainMode = !STATE.plainMode;
+      if (STATE.plainMode) {
+        STATE.pdpMode = 'photo';
+        STATE.libLightActive = false;
+        WorkshopAudio.stop();
+        document.getElementById('audioToggleBtn').textContent = 'Workshop Sound: Off';
+        document.getElementById('audioToggleBtn').classList.remove('is-on');
+      }
+      syncPlainUI();
+      setView(STATE.view);
+    };
+
+    // Library filters & controls
+    ['libSearch', 'libTechniqueFilter', 'libRegionFilter', 'libColorFilter'].forEach(id => {
+      document.getElementById(id).addEventListener('input', renderLibrary);
+      document.getElementById(id).addEventListener('change', renderLibrary);
+    });
+    document.getElementById('libResetFilters').onclick = () => {
+      document.getElementById('libSearch').value = '';
+      document.getElementById('libTechniqueFilter').value = '';
+      document.getElementById('libRegionFilter').value = '';
+      document.getElementById('libColorFilter').value = '';
+      renderLibrary();
+    };
+    document.getElementById('libLightToggle').onclick = () => {
+      if (STATE.plainMode) return;
+      STATE.libLightActive = !STATE.libLightActive;
+      renderLibrary();
+    };
+    document.getElementById('libZoomToggle').onclick = () => {
+      STATE.libMacro = !STATE.libMacro;
+      if (STATE.lightCtrl) STATE.lightCtrl.setZoom(STATE.libMacro ? 2.4 : 1.0);
+      document.getElementById('libZoomToggle').textContent = `Macro 2.4×: ${STATE.libMacro ? 'On' : 'Off'}`;
+    };
+
+    // Workshop Audio toggle
+    document.getElementById('audioToggleBtn').onclick = (e) => {
+      if (STATE.plainMode) return;
+      const isOn = WorkshopAudio.toggle();
+      e.target.textContent = `Workshop Sound: ${isOn ? 'On' : 'Off'}`;
+      e.target.classList.toggle('is-on', isOn);
+    };
+
+    // Drawers
+    document.getElementById('bagOpenBtn').onclick = () => openDrawer('bagDrawer');
+    document.getElementById('assetLoaderBtn').onclick = () => openDrawer('assetDrawer');
+    document.getElementById('drawerBackdrop').onclick = closeDrawers;
+    document.querySelectorAll('[data-close-drawer]').forEach(b => b.onclick = closeDrawers);
+    document.getElementById('checkoutDemoBtn').onclick = () => {
+      alert('Ready to wire to Shopify Storefront API cartCreate mutation (checkoutUrl).');
+    };
+
+    // Studio Photo & Blender .GLB Uploads
+    let lastUploadedSwatchImg = null;
+    document.getElementById('uploadProductPhoto').onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const url = URL.createObjectURL(file);
+      KR_STUDIO_ASSETS.products[STATE.productId].photo = url;
+      document.getElementById('assetLoaderStatus').textContent = `Loaded real studio photo: ${file.name}`;
+      if (STATE.view === 'pdp') renderPDP();
+    };
+
+    const applySwatchUpload = (imgEl, filename) => {
+      const str = parseFloat(document.getElementById('sobelStrength').value);
+      TEXTURE_CACHE[STATE.swatchId] = buildPBRFromUploadedImage(imgEl, str);
+      document.getElementById('assetLoaderStatus').textContent =
+        `Generated Sobel normal + roughness map from ${filename} (strength ${str}).`;
+      if (STATE.view === 'library') renderLibrary();
+      if (STATE.view === 'pdp') renderPDP();
+    };
+
+    document.getElementById('uploadSwatchPhoto').onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const img = new Image();
+      img.onload = () => {
+        lastUploadedSwatchImg = { img, name: file.name };
+        applySwatchUpload(img, file.name);
+      };
+      img.src = URL.createObjectURL(file);
+    };
+    document.getElementById('sobelStrength').oninput = (e) => {
+      document.getElementById('sobelStrengthVal').textContent = e.target.value;
+      if (lastUploadedSwatchImg) applySwatchUpload(lastUploadedSwatchImg.img, lastUploadedSwatchImg.name);
+    };
+
+    document.getElementById('uploadGlbFile').onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const url = URL.createObjectURL(file);
+      STATE.customGlbUrls[STATE.productId] = url;
+      STATE.pdpMode = '3d';
+      STATE.plainMode = false;
+      syncPlainUI();
+      closeDrawers();
+      setView('pdp');
+      STATE.pdpMode = '3d';
+      renderPDP();
+    };
+
+    // Initial boot
+    function loadImageWithFallback(candidates) {
+      return new Promise((resolve, reject) => {
+        let i = 0;
+        const tryNext = () => {
+          if (i >= candidates.length) return reject(new Error('Missing texture'));
+          const src = candidates[i++];
+          const img = new Image();
+          img.onload = () => {
+            const c = document.createElement('canvas');
+            c.width = img.naturalWidth;
+            c.height = img.naturalHeight;
+            c.getContext('2d').drawImage(img, 0, 0);
+            resolve({ canvas: c, src });
+          };
+          img.onerror = tryNext;
+          img.src = src;
+        };
+        tryNext();
+      });
+    }
+
+    function preloadSwatchFromDada(swatchId, prefix) {
+      Promise.all([
+        loadImageWithFallback([`./${prefix}_albedo.jpg`,    `./${prefix}_albedo.png`]),
+        loadImageWithFallback([`./${prefix}_normal.jpg`,    `./${prefix}_normal.png`]),
+        loadImageWithFallback([`./${prefix}_roughness.png`, `./${prefix}_roughness.jpg`])
+      ]).then(([alb, nrm, rgh]) => {
+        TEXTURE_CACHE[swatchId] = {
+          albedoCanvas: alb.canvas,
+          normalCanvas: nrm.canvas,
+          roughCanvas:  rgh.canvas,
+          dataUrl:      alb.src
+        };
+        if (STATE.view === 'pdp') renderPDP();
+        if (STATE.view === 'library') renderLibrary();
+        if (STATE.view === 'rack') renderRack();
+      }).catch(() => {});
+    }
+
+    preloadSwatchFromDada('059', 'kantha_059');
+    initLibraryFilters();
+    syncPlainUI();
+    renderBag();
+    renderPDP();
+  })();
+  </script>
+  <script src="./studio-desk.js"></script>
+</body>
+</html>
